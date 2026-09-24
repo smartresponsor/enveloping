@@ -43,9 +43,18 @@ final readonly class EnvelopeAttributeCodecRegistry
 
             $normalized[] = $codec;
             $codecTypes = [];
+            $transportTypes = $codec->transportTypes();
 
-            foreach ($codec->transportTypes() as $type) {
-                if (!EnvelopeTransportTypeValidator::isValid($type)) {
+            // Runtime implementations are not constrained by interface PHPDoc.
+            // @phpstan-ignore function.alreadyNarrowedType
+            if (!array_is_list($transportTypes)) {
+                throw new EnvelopeCodecException('Envelope attribute codec transport types must be a list.');
+            }
+
+            foreach ($transportTypes as $type) {
+                // Runtime implementations are not constrained by interface PHPDoc.
+                // @phpstan-ignore function.alreadyNarrowedType
+                if (!\is_string($type) || !EnvelopeTransportTypeValidator::isValid($type)) {
                     throw new EnvelopeCodecException('Envelope attribute codec transport type must match /^[a-z][a-z0-9._-]*$/.');
                 }
 

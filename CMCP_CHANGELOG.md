@@ -176,6 +176,14 @@
 - Added a custom empty-payload attribute/codec regression proving encode → JSON `{}` → decode round-trip.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (58 tests, 177 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings; Canon040 reports 98.5% lines / 85.4% methods / 97.0% branches.
 
+## 2026-09-24 — codec transport type collection validation milestone
+
+- Hardened `EnvelopeAttributeCodecRegistry` so `EnvelopeAttributeCodec::transportTypes()` is runtime-enforced as an ordered `list<string>` instead of relying only on interface PHPDoc.
+- Associative transport-type collections and non-string type entries now fail deterministically with `EnvelopeCodecException` rather than leaking incidental `TypeError` or silently accepting malformed codec implementations.
+- Stable wire grammar validation remains applied after list/item validation.
+- Added negative regression codecs for associative and non-string `transportTypes()` implementations.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (60 tests, 181 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings; Canon040 reports 98.5% lines / 85.4% methods / 97.1% branches.
+
 ## 2026-09-24 — RC convergence and Canon052 boundary repair
 
 - Reconnaissance covered the current Enveloping README, Composer development/production manifests, Symfony configuration, source/docblocks, tests, quality scripts, tracked documentation, and the local helper/canon contour for Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization.

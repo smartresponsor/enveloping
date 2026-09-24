@@ -74,6 +74,26 @@ final class EnvelopeCodecTest extends TestCase
         new EnvelopeAttributeCodecRegistry(['not-a-codec']);
     }
 
+    public function testCodecRegistryRejectsAssociativeTransportTypeCollection(): void
+    {
+        $this->expectException(EnvelopeCodecException::class);
+        $this->expectExceptionMessage('transport types must be a list');
+
+        new EnvelopeAttributeCodecRegistry([
+            new EnvelopeAssociativeTransportTypesCodec(),
+        ]);
+    }
+
+    public function testCodecRegistryRejectsNonStringTransportType(): void
+    {
+        $this->expectException(EnvelopeCodecException::class);
+        $this->expectExceptionMessage('transport type must match');
+
+        new EnvelopeAttributeCodecRegistry([
+            new EnvelopeNonStringTransportTypesCodec(),
+        ]);
+    }
+
     public function testDuplicateTransportTypeOwnershipIsRejected(): void
     {
         $this->expectException(EnvelopeCodecException::class);
@@ -437,5 +457,53 @@ final class EnvelopeUndeclaredOutputCodec implements EnvelopeAttributeCodec
     public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
     {
         return new EnvelopeTestAttribute('unused');
+    }
+}
+
+final class EnvelopeAssociativeTransportTypesCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return false;
+    }
+
+    public function transportTypes(): array
+    {
+        // @phpstan-ignore-next-line deliberate malformed runtime contract
+        return ['type' => 'test'];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        throw new \LogicException('Not used.');
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        throw new \LogicException('Not used.');
+    }
+}
+
+final class EnvelopeNonStringTransportTypesCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return false;
+    }
+
+    public function transportTypes(): array
+    {
+        // @phpstan-ignore-next-line deliberate malformed runtime contract
+        return [42];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        throw new \LogicException('Not used.');
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        throw new \LogicException('Not used.');
     }
 }

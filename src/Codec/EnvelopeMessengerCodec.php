@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Enveloping\Codec;
 
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Message\EnvelopeContextStamp;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope as ContextEnvelope;
@@ -90,7 +91,7 @@ final readonly class EnvelopeMessengerCodec
         }
 
         if (EnvelopeTransportDTO::CURRENT_VERSION !== $stamp->version) {
-            throw new \InvalidArgumentException(\sprintf('Unsupported envelope context stamp version %d; expected %d.', $stamp->version, EnvelopeTransportDTO::CURRENT_VERSION));
+            throw new EnvelopeTransportException(\sprintf('Unsupported envelope context stamp version %d; expected %d.', $stamp->version, EnvelopeTransportDTO::CURRENT_VERSION));
         }
 
         $attributes = [];

@@ -6,6 +6,7 @@ namespace App\Enveloping\Message;
 
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
@@ -26,40 +27,40 @@ final readonly class EnvelopeContextStamp implements StampInterface
         public int $version = EnvelopeTransportDTO::CURRENT_VERSION,
     ) {
         if ($version < 1) {
-            throw new \InvalidArgumentException('Envelope context stamp version must be positive.');
+            throw new EnvelopeTransportException('Envelope context stamp version must be positive.');
         }
 
         if (!array_is_list($attributes)) {
-            throw new \InvalidArgumentException('Envelope context stamp attributes must be a list.');
+            throw new EnvelopeTransportException('Envelope context stamp attributes must be a list.');
         }
 
         $normalized = [];
         foreach ($attributes as $index => $attribute) {
             if (!\is_array($attribute)) {
-                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d must be an array.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d must be an array.', $index));
             }
 
             $keys = array_keys($attribute);
             sort($keys);
             if (['payload', 'type'] !== $keys) {
-                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d must contain exactly type and payload.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d must contain exactly type and payload.', $index));
             }
 
             $type = $attribute['type'] ?? null;
             $payload = $attribute['payload'] ?? null;
 
             if (!\is_string($type) || '' === $type) {
-                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d requires a non-empty type.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d requires a non-empty type.', $index));
             }
 
             if (!\is_array($payload)) {
-                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d requires an array payload.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d requires an array payload.', $index));
             }
 
             try {
                 $payload = EnvelopeTransportPayloadValidator::normalizePayload($payload);
-            } catch (\InvalidArgumentException $exception) {
-                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d has invalid payload: %s', $index, $exception->getMessage()), previous: $exception);
+            } catch (EnvelopeTransportException $exception) {
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d has invalid payload: %s', $index, $exception->getMessage()), previous: $exception);
             }
 
             $normalized[] = [

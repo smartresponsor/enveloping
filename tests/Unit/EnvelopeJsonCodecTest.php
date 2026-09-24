@@ -7,6 +7,7 @@ namespace App\Enveloping\Tests\Unit;
 use App\Enveloping\Codec\EnvelopeBuiltInAttributeCodec;
 use App\Enveloping\Codec\EnvelopeCodec;
 use App\Enveloping\Codec\EnvelopeJsonCodec;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
@@ -69,13 +70,33 @@ final class EnvelopeJsonCodecTest extends TestCase
 
     public function testJsonCodecRejectsSubjectEncoderThatLeavesAnObject(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
         $this->expectExceptionMessage('JSON-safe');
 
         $this->codec->encode(
             new Envelope(new EnvelopeJsonTestSubject('subject-1')),
             static fn (mixed $value): mixed => $value,
         );
+    }
+
+    public function testJsonCodecWrapsNativeJsonFailuresAsTransportExceptions(): void
+    {
+        try {
+            $this->codec->decode('{', static fn (mixed $value): mixed => $value);
+            self::fail('Invalid JSON must fail.');
+        } catch (EnvelopeTransportException $exception) {
+            self::assertInstanceOf(\JsonException::class, $exception->getPrevious());
+        }
+
+        try {
+            $this->codec->encode(
+                new Envelope(\NAN),
+                static fn (mixed $value): mixed => $value,
+            );
+            self::fail('Non-encodable JSON value must fail.');
+        } catch (EnvelopeTransportException $exception) {
+            self::assertInstanceOf(\JsonException::class, $exception->getPrevious());
+        }
     }
 
     public function testJsonCodecRejectsMalformedEnvelopeDocumentShapes(): void
@@ -97,7 +118,7 @@ final class EnvelopeJsonCodecTest extends TestCase
             try {
                 $this->codec->decode($json, static fn (mixed $value): mixed => $value);
                 self::fail('Malformed Envelope JSON document should be rejected.');
-            } catch (\InvalidArgumentException) {
+            } catch (EnvelopeTransportException) {
                 self::addToAssertionCount(1);
             }
         }
@@ -105,7 +126,7 @@ final class EnvelopeJsonCodecTest extends TestCase
 
     public function testJsonCodecRejectsUnsupportedTransportVersion(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
         $this->expectExceptionMessage('Unsupported envelope transport version 2');
 
         $this->codec->decode(

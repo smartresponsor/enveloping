@@ -8,6 +8,8 @@ use App\Enveloping\Codec\EnvelopeAttributeCodec;
 use App\Enveloping\Codec\EnvelopeBuiltInAttributeCodec;
 use App\Enveloping\Codec\EnvelopeCodec;
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
+use App\Enveloping\Exception\EnvelopeCodecException;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
@@ -64,7 +66,7 @@ final class EnvelopeCodecTest extends TestCase
 
     public function testDuplicateTransportTypeOwnershipIsRejected(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeCodecException::class);
         $this->expectExceptionMessage('owned by multiple codecs');
 
         new EnvelopeAttributeCodecRegistry([
@@ -75,7 +77,7 @@ final class EnvelopeCodecTest extends TestCase
 
     public function testEmptyTransportTypeOwnershipIsRejected(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeCodecException::class);
         $this->expectExceptionMessage('transport type must be non-empty');
 
         new EnvelopeAttributeCodecRegistry([
@@ -90,7 +92,7 @@ final class EnvelopeCodecTest extends TestCase
             new EnvelopeSecondRuntimeOwnerCodec(),
         ]);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeCodecException::class);
         $this->expectExceptionMessage('supported by multiple codecs');
 
         $registry->encode(new EnvelopeTestAttribute('value'));
@@ -102,7 +104,7 @@ final class EnvelopeCodecTest extends TestCase
             new EnvelopeUndeclaredOutputCodec(),
         ]);
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(EnvelopeCodecException::class);
         $this->expectExceptionMessage('emitted undeclared transport type');
 
         $registry->encode(new EnvelopeTestAttribute('value'));
@@ -114,7 +116,7 @@ final class EnvelopeCodecTest extends TestCase
         $attribute = new class implements EnvelopeAttributeInterface {
         };
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeCodecException::class);
         $this->expectExceptionMessage('No envelope attribute codec supports');
 
         $registry->encode($attribute);
@@ -152,7 +154,7 @@ final class EnvelopeCodecTest extends TestCase
             try {
                 new EnvelopeAttributeTransportDTO('invalid', $payload);
                 self::fail('Non JSON-safe transport payload should be rejected.');
-            } catch (\InvalidArgumentException) {
+            } catch (EnvelopeTransportException) {
                 self::addToAssertionCount(1);
             }
         }
@@ -160,7 +162,7 @@ final class EnvelopeCodecTest extends TestCase
 
     public function testTransportDTORejectsEmptyAttributeType(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
 
         new EnvelopeAttributeTransportDTO('', []);
     }
@@ -175,7 +177,7 @@ final class EnvelopeCodecTest extends TestCase
 
         self::assertSame(1, $transport->version);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
         $this->expectExceptionMessage('Unsupported envelope transport version 2');
 
         $codec->decode(
@@ -186,7 +188,7 @@ final class EnvelopeCodecTest extends TestCase
 
     public function testTransportVersionMustBePositive(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
 
         new \App\Enveloping\DTO\EnvelopeTransportDTO('subject', [], 0);
     }
@@ -201,14 +203,14 @@ final class EnvelopeCodecTest extends TestCase
                 'extra' => true,
             ]));
             self::fail('Unexpected built-in payload fields should be rejected.');
-        } catch (\InvalidArgumentException $exception) {
+        } catch (EnvelopeTransportException $exception) {
             self::assertStringContainsString('exactly key identity', $exception->getMessage());
         }
 
         try {
             $codec->decode(new EnvelopeAttributeTransportDTO('actor', ['identity' => 42]));
             self::fail('Malformed built-in payload should be rejected.');
-        } catch (\InvalidArgumentException $exception) {
+        } catch (EnvelopeTransportException $exception) {
             self::assertStringContainsString('requires string payload key identity', $exception->getMessage());
         }
 
@@ -216,7 +218,7 @@ final class EnvelopeCodecTest extends TestCase
 
         self::assertNotContains($unknown->type, $codec->transportTypes());
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
         $this->expectExceptionMessage('Unsupported envelope attribute transport type');
 
         $codec->decode($unknown);

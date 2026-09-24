@@ -6,6 +6,7 @@ namespace App\Enveloping\Registry;
 
 use App\Enveloping\Codec\EnvelopeAttributeCodec;
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
+use App\Enveloping\Exception\EnvelopeCodecException;
 use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 
 /**
@@ -40,11 +41,11 @@ final readonly class EnvelopeAttributeCodecRegistry
 
             foreach ($codec->transportTypes() as $type) {
                 if ('' === $type) {
-                    throw new \InvalidArgumentException('Envelope attribute codec transport type must be non-empty.');
+                    throw new EnvelopeCodecException('Envelope attribute codec transport type must be non-empty.');
                 }
 
                 if (isset($byType[$type])) {
-                    throw new \InvalidArgumentException(\sprintf('Envelope attribute transport type %s is owned by multiple codecs.', $type));
+                    throw new EnvelopeCodecException(\sprintf('Envelope attribute transport type %s is owned by multiple codecs.', $type));
                 }
 
                 $byType[$type] = $codec;
@@ -72,19 +73,19 @@ final readonly class EnvelopeAttributeCodecRegistry
             }
 
             if (null !== $owner) {
-                throw new \InvalidArgumentException(\sprintf('Envelope attribute %s is supported by multiple codecs.', $attribute::class));
+                throw new EnvelopeCodecException(\sprintf('Envelope attribute %s is supported by multiple codecs.', $attribute::class));
             }
 
             $owner = $codec;
         }
 
         if (null === $owner) {
-            throw new \InvalidArgumentException('No envelope attribute codec supports '.$attribute::class.'.');
+            throw new EnvelopeCodecException('No envelope attribute codec supports '.$attribute::class.'.');
         }
 
         $transport = $owner->encode($attribute);
         if (!\in_array($transport->type, $this->typesByCodec[spl_object_id($owner)] ?? [], true)) {
-            throw new \LogicException(\sprintf('Envelope attribute codec %s emitted undeclared transport type %s.', $owner::class, $transport->type));
+            throw new EnvelopeCodecException(\sprintf('Envelope attribute codec %s emitted undeclared transport type %s.', $owner::class, $transport->type));
         }
 
         return $transport;
@@ -97,7 +98,7 @@ final readonly class EnvelopeAttributeCodecRegistry
     {
         $codec = $this->codecsByType[$transport->type] ?? null;
         if (null === $codec) {
-            throw new \InvalidArgumentException('No envelope attribute codec supports transport type '.$transport->type.'.');
+            throw new EnvelopeCodecException('No envelope attribute codec supports transport type '.$transport->type.'.');
         }
 
         return $codec->decode($transport);

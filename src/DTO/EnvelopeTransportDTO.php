@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enveloping\DTO;
 
+use App\Enveloping\Exception\EnvelopeTransportException;
+
 /**
  * Carries an encoded subject plus typed envelope attribute payloads.
  *
@@ -23,7 +25,7 @@ final readonly class EnvelopeTransportDTO
         public int $version = self::CURRENT_VERSION,
     ) {
         if ($version < 1) {
-            throw new \InvalidArgumentException('Envelope transport version must be positive.');
+            throw new EnvelopeTransportException('Envelope transport version must be positive.');
         }
     }
 }

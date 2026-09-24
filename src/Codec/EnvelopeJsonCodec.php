@@ -6,6 +6,7 @@ namespace App\Enveloping\Codec;
 
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
 use App\Enveloping\ValueObject\Envelope;
 
@@ -27,20 +28,24 @@ final readonly class EnvelopeJsonCodec
         $transport = $this->envelopeCodec->encode($envelope, $encodeSubject);
         EnvelopeTransportPayloadValidator::assertValue($transport->subject);
 
-        return json_encode(
-            [
-                'version' => $transport->version,
-                'subject' => $transport->subject,
-                'attributes' => array_map(
-                    static fn (EnvelopeAttributeTransportDTO $attribute): array => [
-                        'type' => $attribute->type,
-                        'payload' => $attribute->payload,
-                    ],
-                    $transport->attributes,
-                ),
-            ],
-            \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES | \JSON_PRESERVE_ZERO_FRACTION,
-        );
+        try {
+            return json_encode(
+                [
+                    'version' => $transport->version,
+                    'subject' => $transport->subject,
+                    'attributes' => array_map(
+                        static fn (EnvelopeAttributeTransportDTO $attribute): array => [
+                            'type' => $attribute->type,
+                            'payload' => $attribute->payload,
+                        ],
+                        $transport->attributes,
+                    ),
+                ],
+                \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_SLASHES | \JSON_PRESERVE_ZERO_FRACTION,
+            );
+        } catch (\JsonException $exception) {
+            throw new EnvelopeTransportException('Envelope JSON encoding failed: '.$exception->getMessage(), previous: $exception);
+        }
     }
 
     /**
@@ -48,9 +53,14 @@ final readonly class EnvelopeJsonCodec
      */
     public function decode(string $json, callable $decodeSubject): Envelope
     {
-        $decoded = json_decode($json, false, 512, \JSON_THROW_ON_ERROR);
+        try {
+            $decoded = json_decode($json, false, 512, \JSON_THROW_ON_ERROR);
+        } catch (\JsonException $exception) {
+            throw new EnvelopeTransportException('Envelope JSON decoding failed: '.$exception->getMessage(), previous: $exception);
+        }
+
         if (!$decoded instanceof \stdClass) {
-            throw new \InvalidArgumentException('Envelope JSON document must be an object.');
+            throw new EnvelopeTransportException('Envelope JSON document must be an object.');
         }
 
         /** @var array<string, mixed> $document */
@@ -59,22 +69,22 @@ final readonly class EnvelopeJsonCodec
 
         $version = $document['version'] ?? null;
         if (!\is_int($version)) {
-            throw new \InvalidArgumentException('Envelope JSON document requires an integer version.');
+            throw new EnvelopeTransportException('Envelope JSON document requires an integer version.');
         }
 
         if (!\array_key_exists('subject', $document)) {
-            throw new \InvalidArgumentException('Envelope JSON document requires a subject.');
+            throw new EnvelopeTransportException('Envelope JSON document requires a subject.');
         }
 
         $attributeRows = $document['attributes'] ?? null;
         if (!\is_array($attributeRows)) {
-            throw new \InvalidArgumentException('Envelope JSON document requires an attributes list.');
+            throw new EnvelopeTransportException('Envelope JSON document requires an attributes list.');
         }
 
         $attributes = [];
         foreach ($attributeRows as $index => $row) {
             if (!$row instanceof \stdClass) {
-                throw new \InvalidArgumentException(\sprintf('Envelope JSON attribute %d must be an object.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope JSON attribute %d must be an object.', $index));
             }
 
             /** @var array<string, mixed> $attribute */
@@ -85,11 +95,11 @@ final readonly class EnvelopeJsonCodec
             $payload = $attribute['payload'] ?? null;
 
             if (!\is_string($type) || '' === $type) {
-                throw new \InvalidArgumentException(\sprintf('Envelope JSON attribute %d requires a non-empty type.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope JSON attribute %d requires a non-empty type.', $index));
             }
 
             if (!$payload instanceof \stdClass) {
-                throw new \InvalidArgumentException(\sprintf('Envelope JSON attribute %d requires an object payload.', $index));
+                throw new EnvelopeTransportException(\sprintf('Envelope JSON attribute %d requires an object payload.', $index));
             }
 
             $attributes[] = new EnvelopeAttributeTransportDTO(
@@ -135,7 +145,7 @@ final readonly class EnvelopeJsonCodec
         sort($expectedKeys);
 
         if ($actualKeys !== $expectedKeys) {
-            throw new \InvalidArgumentException(\sprintf('%s must contain exactly: %s.', $context, implode(', ', $expectedKeys)));
+            throw new EnvelopeTransportException(\sprintf('%s must contain exactly: %s.', $context, implode(', ', $expectedKeys)));
         }
     }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enveloping\Validator;
 
+use App\Enveloping\Exception\EnvelopeTransportException;
+
 /**
  * Validates transport payloads against JSON-safe recursive value semantics.
  */
@@ -20,7 +22,7 @@ final class EnvelopeTransportPayloadValidator
 
         foreach ($payload as $key => $value) {
             if (!\is_string($key)) {
-                throw new \InvalidArgumentException('Envelope transport payload map keys must be strings.');
+                throw new EnvelopeTransportException('Envelope transport payload map keys must be strings.');
             }
 
             self::assertValue($value);
@@ -40,7 +42,7 @@ final class EnvelopeTransportPayloadValidator
         }
 
         if (!\is_array($value)) {
-            throw new \InvalidArgumentException('Envelope transport payload values must be JSON-safe.');
+            throw new EnvelopeTransportException('Envelope transport payload values must be JSON-safe.');
         }
 
         if (array_is_list($value)) {
@@ -53,7 +55,7 @@ final class EnvelopeTransportPayloadValidator
 
         foreach ($value as $key => $item) {
             if (!\is_string($key)) {
-                throw new \InvalidArgumentException('Envelope transport payload map keys must be strings.');
+                throw new EnvelopeTransportException('Envelope transport payload map keys must be strings.');
             }
 
             self::assertValue($item);

@@ -116,3 +116,12 @@
 - Built-in attribute payloads now enforce their exact owned key (`identity`, `source`, or `id`) instead of ignoring extra fields.
 - Custom attribute payload schema remains fully codec-owned; the shared transport layer continues to enforce only recursive JSON-safe value semantics.
 - Verification: PHPUnit PASS (44 tests, 130 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.7% lines / 82.6% methods / 94.1% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — typed boundary exception milestone
+
+- Added `EnvelopeTransportException` for malformed or unsupported versioned transport data and `EnvelopeCodecException` for codec ownership/configuration failures.
+- JSON encode/decode now wraps native `JsonException` failures into `EnvelopeTransportException` while retaining the original exception as `previous`.
+- Transport DTO, payload validator, JSON adapter, Messenger context stamp, Messenger version checks, and built-in attribute decoding expose typed transport failures.
+- Codec registry duplicate/empty type ownership, ambiguous runtime ownership, unsupported attribute/type ownership, and undeclared emitted type failures now expose `EnvelopeCodecException`.
+- Deliberate caller misuse outside transport corruption remains ordinary `InvalidArgumentException`.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (45 tests, 132 assertions); coverage 97.7% lines / 82.6% methods / 94.2% branches; Gating PASS with 0 failures and 0 warnings.

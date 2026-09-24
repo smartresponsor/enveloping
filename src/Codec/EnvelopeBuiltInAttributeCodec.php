@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Enveloping\Codec;
 
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
 use App\Enveloping\ValueObject\EnvelopeCausationAttribute;
 use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
@@ -71,7 +72,7 @@ final class EnvelopeBuiltInAttributeCodec implements EnvelopeAttributeCodec
             self::TYPE_CAUSATION => new EnvelopeCausationAttribute($this->stringPayload($transport, 'id')),
             self::TYPE_CORRELATION => new EnvelopeCorrelationAttribute($this->stringPayload($transport, 'id')),
             self::TYPE_ORIGIN => new EnvelopeOriginAttribute($this->stringPayload($transport, 'source')),
-            default => throw new \InvalidArgumentException('Unsupported envelope attribute transport type '.$transport->type.'.'),
+            default => throw new EnvelopeTransportException('Unsupported envelope attribute transport type '.$transport->type.'.'),
         };
     }
 
@@ -79,12 +80,12 @@ final class EnvelopeBuiltInAttributeCodec implements EnvelopeAttributeCodec
     {
         $keys = array_keys($transport->payload);
         if ([$key] !== $keys) {
-            throw new \InvalidArgumentException(\sprintf('Envelope attribute %s payload must contain exactly key %s.', $transport->type, $key));
+            throw new EnvelopeTransportException(\sprintf('Envelope attribute %s payload must contain exactly key %s.', $transport->type, $key));
         }
 
         $value = $transport->payload[$key] ?? null;
         if (!\is_string($value)) {
-            throw new \InvalidArgumentException(\sprintf('Envelope attribute %s requires string payload key %s.', $transport->type, $key));
+            throw new EnvelopeTransportException(\sprintf('Envelope attribute %s requires string payload key %s.', $transport->type, $key));
         }
 
         return $value;

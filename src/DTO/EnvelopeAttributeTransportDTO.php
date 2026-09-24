@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enveloping\DTO;
 
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
 
 /**
@@ -22,7 +23,7 @@ final readonly class EnvelopeAttributeTransportDTO
         array $payload,
     ) {
         if ('' === $type) {
-            throw new \InvalidArgumentException('Envelope attribute transport type must be non-empty.');
+            throw new EnvelopeTransportException('Envelope attribute transport type must be non-empty.');
         }
 
         $this->payload = EnvelopeTransportPayloadValidator::normalizePayload($payload);

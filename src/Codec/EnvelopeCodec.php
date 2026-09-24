@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Enveloping\Codec;
 
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
 
@@ -43,7 +44,7 @@ final readonly class EnvelopeCodec
     public function decode(EnvelopeTransportDTO $transport, callable $decodeSubject): Envelope
     {
         if (EnvelopeTransportDTO::CURRENT_VERSION !== $transport->version) {
-            throw new \InvalidArgumentException(\sprintf('Unsupported envelope transport version %d; expected %d.', $transport->version, EnvelopeTransportDTO::CURRENT_VERSION));
+            throw new EnvelopeTransportException(\sprintf('Unsupported envelope transport version %d; expected %d.', $transport->version, EnvelopeTransportDTO::CURRENT_VERSION));
         }
 
         $attributes = [];

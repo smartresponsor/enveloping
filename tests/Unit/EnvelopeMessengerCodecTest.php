@@ -7,6 +7,7 @@ namespace App\Enveloping\Tests\Unit;
 use App\Enveloping\Codec\EnvelopeBuiltInAttributeCodec;
 use App\Enveloping\Codec\EnvelopeMessengerCodec;
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Message\EnvelopeContextStamp;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
@@ -160,7 +161,7 @@ final class EnvelopeMessengerCodecTest extends TestCase
             new EnvelopeContextStamp([], EnvelopeTransportDTO::CURRENT_VERSION + 1),
         ]);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
         $this->expectExceptionMessage('Unsupported envelope context stamp version');
 
         $this->codec->fromMessenger($messenger);
@@ -225,7 +226,7 @@ final class EnvelopeMessengerCodecTest extends TestCase
             try {
                 new EnvelopeContextStamp($attributes);
                 self::fail('Malformed stamp attributes should be rejected.');
-            } catch (\InvalidArgumentException) {
+            } catch (EnvelopeTransportException) {
                 self::addToAssertionCount(1);
             }
         }
@@ -233,7 +234,7 @@ final class EnvelopeMessengerCodecTest extends TestCase
 
     public function testContextStampRejectsNonPositiveVersion(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(EnvelopeTransportException::class);
 
         new EnvelopeContextStamp([], 0);
     }

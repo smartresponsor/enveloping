@@ -232,3 +232,12 @@
 - Added regression coverage for all/selected/none inheritance, polymorphic selection, invalid selection types, parent immutability, ordering, and explicit child replacement.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (69 tests, 215 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — v1 transport compatibility contract milestone
+
+- Added `TRANSPORT_COMPATIBILITY.md` as the normative evolution contract for serialized Envelope version 1.
+- Distinguished package SemVer from transport-version evolution and documented exactly which structural/semantic changes require a new wire version.
+- Documented deployment responsibility for additive custom attribute types: producers may emit a type only to receivers that own its codec.
+- Added a cross-adapter regression proving core DTO, JSON, and Messenger stamp all emit the same `EnvelopeTransportDTO::CURRENT_VERSION`.
+- Decoder policy remains explicit exact-version support; multi-version migration is deferred until a real v2 migration exists.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (70 tests, 220 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+

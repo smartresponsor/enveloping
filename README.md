@@ -81,6 +81,8 @@ Attribute payloads support recursive JSON-safe values: `null`, booleans, integer
 
 The wire contract is decoupled from PHP class names. Built-in attributes use stable transport type identifiers (`actor`, `origin`, `correlation`, `causation`), and custom codecs own their own stable type identifiers. Wire type identifiers use the lowercase ASCII grammar `^[a-z][a-z0-9._-]*$`; whitespace, uppercase, slash-delimited, and other ad-hoc labels are rejected at both codec registration and transport input boundaries. `EnvelopeTransportDTO` carries an explicit format version; the current version is `1`, and unsupported versions are rejected during decoding.
 
+The release/evolution rules for this wire format are defined in `TRANSPORT_COMPATIBILITY.md`. Package SemVer and transport version evolve independently; JSON and Messenger share the same transport version, and incompatible serialized meaning requires an explicit new transport version rather than silent coercion.
+
 ## Optional Symfony Messenger bridge
 
 When `symfony/messenger` is installed, Enveloping conditionally registers `EnvelopeMessengerCodec`. The bridge maps an Enveloping `Envelope` onto Symfony Messenger's own `Envelope` without changing the business message:

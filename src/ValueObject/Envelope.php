@@ -17,11 +17,15 @@ final readonly class Envelope
     /** @var list<EnvelopeAttributeInterface> */
     private array $attributes;
 
-    /** @param iterable<EnvelopeAttributeInterface> $attributes */
+    /** @param iterable<mixed> $attributes */
     public function __construct(public mixed $subject, iterable $attributes = [])
     {
         $normalized = [];
         foreach ($attributes as $attribute) {
+            if (!$attribute instanceof EnvelopeAttributeInterface) {
+                throw new \InvalidArgumentException('Envelope attributes must implement '.EnvelopeAttributeInterface::class.'.');
+            }
+
             $normalized[] = $attribute;
         }
 

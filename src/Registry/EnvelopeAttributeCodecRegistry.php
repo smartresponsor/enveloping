@@ -29,7 +29,7 @@ final readonly class EnvelopeAttributeCodecRegistry
      */
     private array $typesByCodec;
 
-    /** @param iterable<EnvelopeAttributeCodec> $codecs */
+    /** @param iterable<mixed> $codecs */
     public function __construct(iterable $codecs)
     {
         $normalized = [];
@@ -37,6 +37,10 @@ final readonly class EnvelopeAttributeCodecRegistry
         $typesByCodec = [];
 
         foreach ($codecs as $codec) {
+            if (!$codec instanceof EnvelopeAttributeCodec) {
+                throw new EnvelopeCodecException('Envelope attribute codec registry items must implement '.EnvelopeAttributeCodec::class.'.');
+            }
+
             $normalized[] = $codec;
             $codecTypes = [];
 

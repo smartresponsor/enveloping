@@ -167,6 +167,27 @@ final class EnvelopeMessengerCodecTest extends TestCase
         $this->codec->fromMessenger($messenger);
     }
 
+    public function testContextStampFactoryRejectsMalformedTransportAttributeCollections(): void
+    {
+        try {
+            EnvelopeContextStamp::fromTransportAttributes(
+                ['attribute' => new \App\Enveloping\DTO\EnvelopeAttributeTransportDTO('actor', ['identity' => 'actor-1'])],
+                EnvelopeTransportDTO::CURRENT_VERSION,
+            );
+            self::fail('Associative transport attribute collection must be rejected.');
+        } catch (EnvelopeTransportException $exception) {
+            self::assertStringContainsString('attributes must be a list', $exception->getMessage());
+        }
+
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('must be an EnvelopeAttributeTransportDTO');
+
+        EnvelopeContextStamp::fromTransportAttributes(
+            ['not-an-attribute-dto'],
+            EnvelopeTransportDTO::CURRENT_VERSION,
+        );
+    }
+
     public function testContextStampIsSerializableAndReconstructsTransportAttributes(): void
     {
         $stamp = new EnvelopeContextStamp([

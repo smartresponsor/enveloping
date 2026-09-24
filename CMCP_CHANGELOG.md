@@ -152,3 +152,22 @@
 - PHPStan assertion metadata exposes the validator's non-empty-string guarantee without duplicating runtime checks.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (53 tests, 164 assertions); coverage 98.17% lines / 82.98% methods / 96.43% branches.
 - Full Gating PASS: 70 rules, 0 failures, 0 warnings. The previously observed Canon052 consumer-artifact blocker was resolved by the concurrent tooling state; this milestone did not modify `.gating`.
+
+## 2026-09-24 — runtime collection contract validation milestone
+
+- Hardened the core `Envelope` constructor so arbitrary iterable items cannot silently enter the typed attribute list; non-attribute values fail as caller misuse with `InvalidArgumentException`.
+- Hardened `EnvelopeAttributeCodecRegistry` so every iterable item must implement `EnvelopeAttributeCodec`, with invalid registrations exposed as `EnvelopeCodecException`.
+- Hardened `EnvelopeContextStamp::fromTransportAttributes()` so transport attributes must be an ordered list of `EnvelopeAttributeTransportDTO`; malformed collections fail with `EnvelopeTransportException` rather than incidental closure/type errors.
+- Added regression coverage for all three runtime collection boundaries.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (56 tests, 171 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
+
+## 2026-09-24 — RC convergence and Canon052 boundary repair
+
+- Reconnaissance covered the current Enveloping README, Composer development/production manifests, Symfony configuration, source/docblocks, tests, quality scripts, tracked documentation, and the local helper/canon contour for Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization.
+- Market/OSS comparison used Symfony Messenger stamps, OpenTelemetry context/baggage, and CloudEvents context attributes as external reference points. RC scope remained transport/context correctness and boundary safety; broader tracing/baggage/CloudEvents adapters remain growth work rather than RC requirements.
+- Consulted normative Canonization rules included Canon012, Canon018, Canon022, Canon025, Canon029, Canon032, Canon034, Canon038, Canon041, Canon042, Canon043, Canon045, Canon048, Canon052, and Canon053. Target mapping: Canon018/025/029/032/034/038/043/045/052/053 apply; Canon022 explicitly exempts Enveloping from the normal application dependency baseline; Canon041/042 are non-applicable to this headless foundation; Canon048 is non-applicable because Enveloping owns no Doctrine Entity.
+- Canon022 therefore takes precedence over the generic application contour: Objecting, Cruding, Viewing, and Interfacing were treated as contract/reference repositories and were not invented as Enveloping runtime dependencies.
+- Repaired the Canon052 consumer artifact boundary by moving the copied Gating owner tree out of `.gating/` into ignored `var/cache/enveloping-gating-pollution-rc`; the operation was reversible and preserved only canonical consumer artifact state under `.gating/`.
+- Final acceptance exposed an Xdebug-dependent defect in the 512-level JSON-safe nesting guard: recursive validation could hit the runtime stack guard before Enveloping raised its typed transport exception. Replaced recursive traversal with an explicit typed work stack so the declared depth contract is runtime-independent.
+- Final executable acceptance: `composer quality` PASS; PHPUnit 56/56 tests with 171 assertions; Canon040 PASS at 98.2% lines / 83.0% methods / 96.6% branches; Canon052 PASS; full Gating PASS with no failed rules.
+

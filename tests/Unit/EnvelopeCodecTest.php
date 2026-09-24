@@ -66,6 +66,14 @@ final class EnvelopeCodecTest extends TestCase
         self::assertSame('custom-value', $decoded->value);
     }
 
+    public function testCodecRegistryRejectsNonCodecItems(): void
+    {
+        $this->expectException(EnvelopeCodecException::class);
+        $this->expectExceptionMessage('registry items must implement');
+
+        new EnvelopeAttributeCodecRegistry(['not-a-codec']);
+    }
+
     public function testDuplicateTransportTypeOwnershipIsRejected(): void
     {
         $this->expectException(EnvelopeCodecException::class);

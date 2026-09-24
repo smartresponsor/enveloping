@@ -73,21 +73,26 @@ final readonly class EnvelopeContextStamp implements StampInterface
         $this->attributes = $normalized;
     }
 
-    /**
-     * @param list<EnvelopeAttributeTransportDTO> $attributes
-     */
+    /** @param array<mixed> $attributes */
     public static function fromTransportAttributes(array $attributes, int $version): self
     {
-        return new self(
-            array_map(
-                static fn (EnvelopeAttributeTransportDTO $attribute): array => [
-                    'type' => $attribute->type,
-                    'payload' => $attribute->payload,
-                ],
-                $attributes,
-            ),
-            $version,
-        );
+        if (!array_is_list($attributes)) {
+            throw new EnvelopeTransportException('Envelope transport attributes must be a list.');
+        }
+
+        $normalized = [];
+        foreach ($attributes as $index => $attribute) {
+            if (!$attribute instanceof EnvelopeAttributeTransportDTO) {
+                throw new EnvelopeTransportException(\sprintf('Envelope transport attribute %d must be an EnvelopeAttributeTransportDTO.', $index));
+            }
+
+            $normalized[] = [
+                'type' => $attribute->type,
+                'payload' => $attribute->payload,
+            ];
+        }
+
+        return new self($normalized, $version);
     }
 
     /**

@@ -28,6 +28,14 @@ final class EnvelopeTest extends TestCase
         self::assertSame('checkout', $envelope->last(EnvelopeOriginAttribute::class)?->source);
     }
 
+    public function testConstructorRejectsNonEnvelopeAttributeItems(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Envelope attributes must implement');
+
+        new Envelope('subject', ['not-an-envelope-attribute']);
+    }
+
     public function testAttributesAreImmutableAndCanRepeatByType(): void
     {
         $original = new Envelope('subject', [new EnvelopeCorrelationAttribute('first')]);

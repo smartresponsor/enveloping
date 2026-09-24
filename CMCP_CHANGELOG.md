@@ -241,3 +241,10 @@
 - Decoder policy remains explicit exact-version support; multi-version migration is deferred until a real v2 migration exists.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (70 tests, 220 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — propagation-to-Messenger integration proof milestone
+
+- Added an integration-level consumer proof covering parent execution context, selective propagation to a child message, explicit child actor replacement, Symfony Messenger transport, and reconstruction on the receiving side.
+- The proof verifies that selected `Origin` and `Correlation` context survive the boundary, child-specific `Actor` overrides are preserved, omitted `Causation` does not leak, and the parent Envelope remains immutable.
+- This closes the product path without forcing a dependency into a concurrently modified external consumer repository.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+

@@ -99,3 +99,12 @@
 - Transport payload maps are normalized to string-key maps before storage; objects, resources, and non-string map keys are rejected.
 - Added regression coverage for nested map/list payloads, native stamp serialization, object values, and invalid map keys.
 - Verification: PHPUnit PASS (39 tests, 108 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.3% lines / 85.0% methods / 93.9% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — JSON wire adapter milestone
+
+- Added `EnvelopeJsonCodec` as a non-Messenger adapter over the existing versioned `EnvelopeTransportDTO` contract.
+- Subject encoding and decoding remain caller-owned; the adapter rejects encoded subjects that are not recursively JSON-safe.
+- JSON decoding preserves object-vs-array semantics by parsing objects as `stdClass` before recursive normalization, preventing `{}` from being silently treated as `[]`.
+- Envelope document shape, version, attributes list, attribute object shape, type IDs, and payload object shape are validated before reconstruction.
+- Registered `EnvelopeJsonCodec` in the reusable Symfony service surface.
+- Verification: PHPUnit PASS (44 tests, 126 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.9% lines / 86.7% methods / 94.8% branches; Gating PASS with 0 failures and 0 warnings.

@@ -15,3 +15,5 @@ services:
       $codecs: !tagged_iterator enveloping.attribute_codec
 
   App\Enveloping\Codec\EnvelopeCodec: ~
+
+  App\Enveloping\Codec\EnvelopeJsonCodec: ~

@@ -30,7 +30,10 @@ final class EnvelopeTransportPayloadValidator
         return $normalized;
     }
 
-    private static function assertValue(mixed $value): void
+    /**
+     * Validates one arbitrary JSON-safe transport value.
+     */
+    public static function assertValue(mixed $value): void
     {
         if (null === $value || \is_scalar($value)) {
             return;

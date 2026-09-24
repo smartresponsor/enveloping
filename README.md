@@ -92,3 +92,9 @@ When `symfony/messenger` is installed, Enveloping conditionally registers `Envel
 This keeps Symfony transport metadata at the integration edge instead of leaking `StampInterface` into the Enveloping core model.
 
 The Messenger bridge also supports existing Symfony envelopes. `withContext()` replaces only `EnvelopeContextStamp`, preserving unrelated Messenger stamps; `withoutContext()` removes only Enveloping context. Empty Enveloping context clears the stamp entirely, and replacing context requires the exact same business message object to prevent context/message mismatch.
+
+## JSON wire adapter
+
+`EnvelopeJsonCodec` is a second transport adapter over the same versioned Envelope DTO contract. It proves that Messenger is not the transport model itself: HTTP, MCP, CLI, files, or other process boundaries can use the same stable context wire format without depending on Symfony Messenger.
+
+Subject encoding/decoding remains external. The JSON adapter requires the encoded subject to be JSON-safe, preserves strict JSON object-vs-array semantics, validates envelope/attribute document shape, and delegates attribute reconstruction back to the typed codec registry.

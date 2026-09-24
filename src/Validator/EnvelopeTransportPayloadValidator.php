@@ -39,48 +39,55 @@ final class EnvelopeTransportPayloadValidator
      */
     public static function assertValue(mixed $value, int $depth = 0): void
     {
-        if (null === $value || \is_bool($value) || \is_int($value)) {
-            return;
-        }
+        /** @var list<array{mixed, int}> $pending */
+        $pending = [[$value, $depth]];
 
-        if (\is_float($value)) {
-            if (!is_finite($value)) {
-                throw new EnvelopeTransportException('Envelope transport payload floats must be finite.');
+        while ([] !== $pending) {
+            [$current, $currentDepth] = array_pop($pending);
+
+            if (null === $current || \is_bool($current) || \is_int($current)) {
+                continue;
             }
 
-            return;
-        }
+            if (\is_float($current)) {
+                if (!is_finite($current)) {
+                    throw new EnvelopeTransportException('Envelope transport payload floats must be finite.');
+                }
 
-        if (\is_string($value)) {
-            if (1 !== preg_match('//u', $value)) {
-                throw new EnvelopeTransportException('Envelope transport payload strings must be valid UTF-8.');
+                continue;
             }
 
-            return;
-        }
+            if (\is_string($current)) {
+                if (1 !== preg_match('//u', $current)) {
+                    throw new EnvelopeTransportException('Envelope transport payload strings must be valid UTF-8.');
+                }
 
-        if (!\is_array($value)) {
-            throw new EnvelopeTransportException('Envelope transport payload values must be JSON-safe.');
-        }
-
-        if ($depth >= self::MAX_DEPTH) {
-            throw new EnvelopeTransportException(\sprintf('Envelope transport payload nesting must not exceed %d levels.', self::MAX_DEPTH));
-        }
-
-        if (array_is_list($value)) {
-            foreach ($value as $item) {
-                self::assertValue($item, $depth + 1);
+                continue;
             }
 
-            return;
-        }
-
-        foreach ($value as $key => $item) {
-            if (!\is_string($key)) {
-                throw new EnvelopeTransportException('Envelope transport payload map keys must be strings.');
+            if (!\is_array($current)) {
+                throw new EnvelopeTransportException('Envelope transport payload values must be JSON-safe.');
             }
 
-            self::assertValue($item, $depth + 1);
+            if ($currentDepth >= self::MAX_DEPTH) {
+                throw new EnvelopeTransportException(\sprintf('Envelope transport payload nesting must not exceed %d levels.', self::MAX_DEPTH));
+            }
+
+            if (array_is_list($current)) {
+                foreach ($current as $item) {
+                    $pending[] = [$item, $currentDepth + 1];
+                }
+
+                continue;
+            }
+
+            foreach ($current as $key => $item) {
+                if (!\is_string($key)) {
+                    throw new EnvelopeTransportException('Envelope transport payload map keys must be strings.');
+                }
+
+                $pending[] = [$item, $currentDepth + 1];
+            }
         }
     }
 }

@@ -77,6 +77,11 @@ final class EnvelopeBuiltInAttributeCodec implements EnvelopeAttributeCodec
 
     private function stringPayload(EnvelopeAttributeTransportDTO $transport, string $key): string
     {
+        $keys = array_keys($transport->payload);
+        if ([$key] !== $keys) {
+            throw new \InvalidArgumentException(\sprintf('Envelope attribute %s payload must contain exactly key %s.', $transport->type, $key));
+        }
+
         $value = $transport->payload[$key] ?? null;
         if (!\is_string($value)) {
             throw new \InvalidArgumentException(\sprintf('Envelope attribute %s requires string payload key %s.', $transport->type, $key));

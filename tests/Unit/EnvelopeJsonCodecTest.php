@@ -89,6 +89,8 @@ final class EnvelopeJsonCodecTest extends TestCase
             '{"version":1,"subject":{},"attributes":[[]]}',
             '{"version":1,"subject":{},"attributes":[{"type":"","payload":{}}]}',
             '{"version":1,"subject":{},"attributes":[{"type":"actor","payload":"invalid"}]}',
+            '{"version":1,"subject":{},"attributes":[],"extra":true}',
+            '{"version":1,"subject":{},"attributes":[{"type":"actor","payload":{"identity":"actor-1"},"extra":true}]}',
         ];
 
         foreach ($documents as $json) {
@@ -112,16 +114,21 @@ final class EnvelopeJsonCodecTest extends TestCase
         );
     }
 
-    public function testJsonCodecPreservesNestedJsonSafeAttributePayloads(): void
+    public function testJsonCodecPreservesNestedJsonSafeSubjectPayload(): void
     {
-        $json = '{"version":1,"subject":"subject","attributes":[{"type":"actor","payload":{"identity":"actor-1","extra":{"list":[1,2,3]}}}]}';
+        $json = '{"version":1,"subject":{"nested":{"list":[1,2,3],"flag":true}},"attributes":[]}';
 
         $decoded = $this->codec->decode(
             $json,
             static fn (mixed $value): mixed => $value,
         );
 
-        self::assertSame('actor-1', $decoded->last(EnvelopeActorAttribute::class)?->identity);
+        self::assertSame([
+            'nested' => [
+                'list' => [1, 2, 3],
+                'flag' => true,
+            ],
+        ], $decoded->subject);
     }
 }
 

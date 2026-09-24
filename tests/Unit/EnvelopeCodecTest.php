@@ -196,6 +196,16 @@ final class EnvelopeCodecTest extends TestCase
         $codec = new EnvelopeBuiltInAttributeCodec();
 
         try {
+            $codec->decode(new EnvelopeAttributeTransportDTO('actor', [
+                'identity' => 'actor-1',
+                'extra' => true,
+            ]));
+            self::fail('Unexpected built-in payload fields should be rejected.');
+        } catch (\InvalidArgumentException $exception) {
+            self::assertStringContainsString('exactly key identity', $exception->getMessage());
+        }
+
+        try {
             $codec->decode(new EnvelopeAttributeTransportDTO('actor', ['identity' => 42]));
             self::fail('Malformed built-in payload should be rejected.');
         } catch (\InvalidArgumentException $exception) {

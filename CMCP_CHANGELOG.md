@@ -108,3 +108,11 @@
 - Envelope document shape, version, attributes list, attribute object shape, type IDs, and payload object shape are validated before reconstruction.
 - Registered `EnvelopeJsonCodec` in the reusable Symfony service surface.
 - Verification: PHPUnit PASS (44 tests, 126 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.9% lines / 86.7% methods / 94.8% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — closed wire wrapper schema milestone
+
+- Hardened the versioned JSON document so only `version`, `subject`, and `attributes` are accepted at the Envelope wrapper level.
+- Attribute wrappers in JSON and Messenger stamps now accept exactly `type` and `payload`; unknown structural fields fail fast.
+- Built-in attribute payloads now enforce their exact owned key (`identity`, `source`, or `id`) instead of ignoring extra fields.
+- Custom attribute payload schema remains fully codec-owned; the shared transport layer continues to enforce only recursive JSON-safe value semantics.
+- Verification: PHPUnit PASS (44 tests, 130 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.7% lines / 82.6% methods / 94.1% branches; Gating PASS with 0 failures and 0 warnings.

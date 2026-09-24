@@ -53,7 +53,9 @@ final readonly class EnvelopeJsonCodec
             throw new \InvalidArgumentException('Envelope JSON document must be an object.');
         }
 
+        /** @var array<string, mixed> $document */
         $document = get_object_vars($decoded);
+        $this->assertExactKeys($document, ['version', 'subject', 'attributes'], 'Envelope JSON document');
 
         $version = $document['version'] ?? null;
         if (!\is_int($version)) {
@@ -75,7 +77,10 @@ final readonly class EnvelopeJsonCodec
                 throw new \InvalidArgumentException(\sprintf('Envelope JSON attribute %d must be an object.', $index));
             }
 
+            /** @var array<string, mixed> $attribute */
             $attribute = get_object_vars($row);
+            $this->assertExactKeys($attribute, ['type', 'payload'], \sprintf('Envelope JSON attribute %d', $index));
+
             $type = $attribute['type'] ?? null;
             $payload = $attribute['payload'] ?? null;
 
@@ -117,6 +122,21 @@ final readonly class EnvelopeJsonCodec
         }
 
         return $normalized;
+    }
+
+    /**
+     * @param array<string, mixed> $value
+     * @param list<string>         $expectedKeys
+     */
+    private function assertExactKeys(array $value, array $expectedKeys, string $context): void
+    {
+        $actualKeys = array_keys($value);
+        sort($actualKeys);
+        sort($expectedKeys);
+
+        if ($actualKeys !== $expectedKeys) {
+            throw new \InvalidArgumentException(\sprintf('%s must contain exactly: %s.', $context, implode(', ', $expectedKeys)));
+        }
     }
 
     private function normalizeJsonValue(mixed $value): mixed

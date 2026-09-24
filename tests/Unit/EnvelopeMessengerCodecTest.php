@@ -218,6 +218,7 @@ final class EnvelopeMessengerCodecTest extends TestCase
             [['type' => 'actor', 'payload' => 'invalid']],
             [['type' => 'actor', 'payload' => [0 => 'invalid-key']]],
             [['type' => 'actor', 'payload' => ['value' => new \stdClass()]]],
+            [['type' => 'actor', 'payload' => ['identity' => 'actor-1'], 'extra' => true]],
         ];
 
         foreach ($cases as $attributes) {

@@ -39,6 +39,12 @@ final readonly class EnvelopeContextStamp implements StampInterface
                 throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d must be an array.', $index));
             }
 
+            $keys = array_keys($attribute);
+            sort($keys);
+            if (['payload', 'type'] !== $keys) {
+                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d must contain exactly type and payload.', $index));
+            }
+
             $type = $attribute['type'] ?? null;
             $payload = $attribute['payload'] ?? null;
 

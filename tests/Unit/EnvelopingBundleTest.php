@@ -14,7 +14,10 @@ final class EnvelopingBundleTest extends TestCase
 {
     public function testBundleExposesItsPackageExtension(): void
     {
-        self::assertInstanceOf(EnvelopingExtension::class, (new EnvelopingBundle())->getContainerExtension());
+        $extension = (new EnvelopingBundle())->getContainerExtension();
+
+        self::assertInstanceOf(EnvelopingExtension::class, $extension);
+        self::assertSame('enveloping', $extension->getAlias());
     }
 
     public function testExtensionLoadsPackageParametersAndFactoryService(): void

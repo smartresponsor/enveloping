@@ -6,6 +6,7 @@ namespace App\Enveloping\Tests\Unit;
 
 use App\Enveloping\ValueObject\Envelope;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
+use App\Enveloping\ValueObject\EnvelopeCausationAttribute;
 use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
 use App\Enveloping\ValueObject\EnvelopeOriginAttribute;
 use PHPUnit\Framework\TestCase;
@@ -46,8 +47,8 @@ final class EnvelopeTest extends TestCase
         self::assertSame([], $envelope->all(EnvelopeCorrelationAttribute::class));
         self::assertSame([], $envelope->attributes());
 
-        $withCause = $envelope->with(new \App\Enveloping\ValueObject\EnvelopeCausationAttribute('cause-1'));
-        self::assertSame('cause-1', $withCause->last(\App\Enveloping\ValueObject\EnvelopeCausationAttribute::class)?->id);
+        $withCause = $envelope->with(new EnvelopeCausationAttribute('cause-1'));
+        self::assertSame('cause-1', $withCause->last(EnvelopeCausationAttribute::class)?->id);
         self::assertSame($withCause->attributes(), $withCause->without(EnvelopeActorAttribute::class)->attributes());
     }
 
@@ -104,6 +105,25 @@ final class EnvelopeTest extends TestCase
 
         self::assertSame([], $cleared->attributes());
         self::assertSame($envelope, $envelope->without(EnvelopeCorrelationAttribute::class));
+    }
+
+    public function testGenericAttributesRejectBlankValues(): void
+    {
+        $factories = [
+            static fn (): EnvelopeActorAttribute => new EnvelopeActorAttribute(''),
+            static fn (): EnvelopeOriginAttribute => new EnvelopeOriginAttribute(''),
+            static fn (): EnvelopeCorrelationAttribute => new EnvelopeCorrelationAttribute(''),
+            static fn (): EnvelopeCausationAttribute => new EnvelopeCausationAttribute(''),
+        ];
+
+        foreach ($factories as $factory) {
+            try {
+                $factory();
+                self::fail('Expected blank envelope attribute value to be rejected.');
+            } catch (\InvalidArgumentException $exception) {
+                self::assertStringContainsString('non-empty', $exception->getMessage());
+            }
+        }
     }
 
     public function testAttributeTypeCanBeRemovedWithoutChangingSubject(): void

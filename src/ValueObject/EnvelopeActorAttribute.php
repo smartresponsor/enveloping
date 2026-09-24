@@ -13,5 +13,8 @@ final readonly class EnvelopeActorAttribute implements EnvelopeAttributeInterfac
 {
     public function __construct(public string $identity)
     {
+        if ('' === $identity) {
+            throw new \InvalidArgumentException('Actor identity must be non-empty.');
+        }
     }
 }

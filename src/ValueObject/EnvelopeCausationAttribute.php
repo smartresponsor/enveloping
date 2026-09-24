@@ -13,5 +13,8 @@ final readonly class EnvelopeCausationAttribute implements EnvelopeAttributeInte
 {
     public function __construct(public string $id)
     {
+        if ('' === $id) {
+            throw new \InvalidArgumentException('Causation identifier must be non-empty.');
+        }
     }
 }

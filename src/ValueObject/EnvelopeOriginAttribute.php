@@ -13,5 +13,8 @@ final readonly class EnvelopeOriginAttribute implements EnvelopeAttributeInterfa
 {
     public function __construct(public string $source)
     {
+        if ('' === $source) {
+            throw new \InvalidArgumentException('Origin source must be non-empty.');
+        }
     }
 }

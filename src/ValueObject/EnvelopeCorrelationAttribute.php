@@ -13,5 +13,8 @@ final readonly class EnvelopeCorrelationAttribute implements EnvelopeAttributeIn
 {
     public function __construct(public string $id)
     {
+        if ('' === $id) {
+            throw new \InvalidArgumentException('Correlation identifier must be non-empty.');
+        }
     }
 }

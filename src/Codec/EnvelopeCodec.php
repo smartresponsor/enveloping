@@ -18,6 +18,8 @@ final readonly class EnvelopeCodec
     }
 
     /**
+     * Encodes an Envelope using the current wire-format version.
+     *
      * @param callable(mixed): mixed $encodeSubject
      */
     public function encode(Envelope $envelope, callable $encodeSubject): EnvelopeTransportDTO
@@ -40,6 +42,10 @@ final readonly class EnvelopeCodec
      */
     public function decode(EnvelopeTransportDTO $transport, callable $decodeSubject): Envelope
     {
+        if (EnvelopeTransportDTO::CURRENT_VERSION !== $transport->version) {
+            throw new \InvalidArgumentException(\sprintf('Unsupported envelope transport version %d; expected %d.', $transport->version, EnvelopeTransportDTO::CURRENT_VERSION));
+        }
+
         $attributes = [];
         foreach ($transport->attributes as $attribute) {
             $attributes[] = $this->attributeCodecs->decode($attribute);

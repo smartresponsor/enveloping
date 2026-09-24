@@ -56,7 +56,7 @@ final class EnvelopeCodecTest extends TestCase
         $transport = $registry->encode($attribute);
         $decoded = $registry->decode($transport);
 
-        self::assertSame(EnvelopeTestAttribute::class, $transport->type);
+        self::assertSame('test', $transport->type);
         self::assertSame('custom-value', $transport->payload['value']);
         self::assertInstanceOf(EnvelopeTestAttribute::class, $decoded);
         self::assertSame('custom-value', $decoded->value);
@@ -81,12 +81,38 @@ final class EnvelopeCodecTest extends TestCase
         new EnvelopeAttributeTransportDTO('', []);
     }
 
+    public function testTransportFormatVersionIsStableAndUnsupportedVersionsAreRejected(): void
+    {
+        $codec = new EnvelopeCodec(new EnvelopeAttributeCodecRegistry([
+            new EnvelopeBuiltInAttributeCodec(),
+        ]));
+
+        $transport = $codec->encode(new Envelope('subject'), static fn (mixed $value): mixed => $value);
+
+        self::assertSame(1, $transport->version);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported envelope transport version 2');
+
+        $codec->decode(
+            new \App\Enveloping\DTO\EnvelopeTransportDTO('subject', [], 2),
+            static fn (mixed $value): mixed => $value,
+        );
+    }
+
+    public function testTransportVersionMustBePositive(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new \App\Enveloping\DTO\EnvelopeTransportDTO('subject', [], 0);
+    }
+
     public function testBuiltInCodecRejectsMalformedPayloadAndUnknownTypes(): void
     {
         $codec = new EnvelopeBuiltInAttributeCodec();
 
         try {
-            $codec->decode(new EnvelopeAttributeTransportDTO(EnvelopeActorAttribute::class, ['identity' => 42]));
+            $codec->decode(new EnvelopeAttributeTransportDTO('actor', ['identity' => 42]));
             self::fail('Malformed built-in payload should be rejected.');
         } catch (\InvalidArgumentException $exception) {
             self::assertStringContainsString('requires string payload key identity', $exception->getMessage());
@@ -94,7 +120,7 @@ final class EnvelopeCodecTest extends TestCase
 
         $unknown = new EnvelopeAttributeTransportDTO('unknown.attribute', []);
 
-        self::assertFalse($codec->supports($unknown->type));
+        self::assertFalse($codec->supportsType($unknown->type));
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported envelope attribute transport type');
@@ -112,9 +138,14 @@ final readonly class EnvelopeTestAttribute implements EnvelopeAttributeInterface
 
 final class EnvelopeTestAttributeCodec implements EnvelopeAttributeCodec
 {
-    public function supports(EnvelopeAttributeInterface|string $attribute): bool
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
     {
-        return (\is_string($attribute) ? $attribute : $attribute::class) === EnvelopeTestAttribute::class;
+        return $attribute instanceof EnvelopeTestAttribute;
+    }
+
+    public function supportsType(string $type): bool
+    {
+        return 'test' === $type;
     }
 
     public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
@@ -123,7 +154,7 @@ final class EnvelopeTestAttributeCodec implements EnvelopeAttributeCodec
             throw new \InvalidArgumentException('EnvelopeTestAttributeCodec received an unsupported attribute.');
         }
 
-        return new EnvelopeAttributeTransportDTO(EnvelopeTestAttribute::class, ['value' => $attribute->value]);
+        return new EnvelopeAttributeTransportDTO('test', ['value' => $attribute->value]);
     }
 
     public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface

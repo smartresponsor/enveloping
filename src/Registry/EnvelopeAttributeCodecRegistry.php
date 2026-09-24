@@ -28,12 +28,12 @@ final readonly class EnvelopeAttributeCodecRegistry
     }
 
     /**
-     * Delegates encoding to the first registered codec that supports the attribute.
+     * Delegates encoding to the first registered codec that supports the runtime attribute.
      */
     public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
     {
         foreach ($this->codecs as $codec) {
-            if ($codec->supports($attribute)) {
+            if ($codec->supportsAttribute($attribute)) {
                 return $codec->encode($attribute);
             }
         }
@@ -42,12 +42,12 @@ final readonly class EnvelopeAttributeCodecRegistry
     }
 
     /**
-     * Delegates decoding to the first registered codec that supports the transport type.
+     * Delegates decoding to the first registered codec that supports the stable transport type.
      */
     public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
     {
         foreach ($this->codecs as $codec) {
-            if ($codec->supports($transport->type)) {
+            if ($codec->supportsType($transport->type)) {
                 return $codec->decode($transport);
             }
         }

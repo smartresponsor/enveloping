@@ -12,12 +12,18 @@ namespace App\Enveloping\DTO;
  */
 final readonly class EnvelopeTransportDTO
 {
+    public const int CURRENT_VERSION = 1;
+
     /**
      * @param list<EnvelopeAttributeTransportDTO> $attributes
      */
     public function __construct(
         public mixed $subject,
         public array $attributes,
+        public int $version = self::CURRENT_VERSION,
     ) {
+        if ($version < 1) {
+            throw new \InvalidArgumentException('Envelope transport version must be positive.');
+        }
     }
 }

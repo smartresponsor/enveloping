@@ -13,9 +13,14 @@ use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 interface EnvelopeAttributeCodec
 {
     /**
-     * Reports whether this codec owns the runtime attribute instance or transport type.
+     * Reports whether this codec owns the runtime attribute instance.
      */
-    public function supports(EnvelopeAttributeInterface|string $attribute): bool;
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool;
+
+    /**
+     * Reports whether this codec owns the stable transport type identifier.
+     */
+    public function supportsType(string $type): bool;
 
     /**
      * Converts a supported typed attribute into transport-safe scalar payload data.

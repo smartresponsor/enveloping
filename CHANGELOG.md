@@ -8,6 +8,10 @@ Envelope wire format has its own version lifecycle documented in
 
 ## [Unreleased]
 
+No unreleased product changes yet.
+
+## [1.0.0] - 2026-09-24
+
 ### Added
 
 - immutable typed `Envelope` context wrapper for arbitrary subjects;
@@ -38,4 +42,3 @@ Envelope wire format has its own version lifecycle documented in
 - PHPUnit exercises unit and integration behavior with branch/path coverage;
 - canonical Gating integration is part of the quality pipeline.
 
-No stable package release has been tagged yet.

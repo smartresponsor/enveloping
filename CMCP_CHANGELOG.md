@@ -265,3 +265,10 @@
 - All six `release:check` constituent commands passed independently. One PHPStan run initially hit a transient `%TEMP%` cache-write error and passed immediately on isolated rerun; the aggregate Console MCP wrapper did not return a final result on repeated long-form execution, so no project failure is inferred from that wrapper behavior.
 - Verified state: both Composer manifests PASS strict validation; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — v1.0.0 release finalization milestone
+
+- Finalized `CHANGELOG.md` with an empty `Unreleased` section and a dated `1.0.0` release section for 2026-09-24.
+- Re-ran the full release-candidate acceptance on the final release content: development Composer manifest PASS; production Composer manifest PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
+- The repository has a configured canonical remote at `git@github.com:smartresponsor/enveloping.git` with `master` tracking `origin/master`.
+- This milestone prepares the signed release commit for publication. Signed semantic-version tagging remains a separate Git operation because the current Console MCP registry does not expose tag creation.
+

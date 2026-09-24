@@ -97,7 +97,7 @@ The Messenger bridge also supports existing Symfony envelopes. `withContext()` r
 
 `EnvelopeJsonCodec` is a second transport adapter over the same versioned Envelope DTO contract. It proves that Messenger is not the transport model itself: HTTP, MCP, CLI, files, or other process boundaries can use the same stable context wire format without depending on Symfony Messenger.
 
-Subject encoding/decoding remains external. The JSON adapter requires the encoded subject to be JSON-safe, preserves strict JSON object-vs-array semantics, validates envelope/attribute document shape, and delegates attribute reconstruction back to the typed codec registry.
+Subject encoding/decoding remains external. The JSON adapter requires the encoded subject to be JSON-safe, preserves strict JSON object-vs-array semantics, validates envelope/attribute document shape, and delegates attribute reconstruction back to the typed codec registry. Attribute `payload` is structurally a JSON object even when empty, so a custom codec returning an empty PHP payload map serializes as `{}` and round-trips through the strict decoder.
 
 The versioned wrapper schema is closed: Envelope JSON documents contain exactly `version`, `subject`, and `attributes`; attribute wrappers contain exactly `type` and `payload`; Messenger context-stamp entries follow the same two-field wrapper. Unknown structural fields are rejected instead of ignored. Built-in attribute payload schemas are strict as well, while custom payload schemas remain owned entirely by their custom codecs.
 

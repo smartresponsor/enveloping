@@ -36,7 +36,7 @@ final readonly class EnvelopeJsonCodec
                     'attributes' => array_map(
                         static fn (EnvelopeAttributeTransportDTO $attribute): array => [
                             'type' => $attribute->type,
-                            'payload' => $attribute->payload,
+                            'payload' => (object) $attribute->payload,
                         ],
                         $transport->attributes,
                     ),

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Enveloping\Tests\Unit;
 
+use App\Enveloping\Codec\EnvelopeAttributeCodec;
 use App\Enveloping\Codec\EnvelopeBuiltInAttributeCodec;
 use App\Enveloping\Codec\EnvelopeCodec;
 use App\Enveloping\Codec\EnvelopeJsonCodec;
+use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
 use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
+use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 use PHPUnit\Framework\TestCase;
 
 final class EnvelopeJsonCodecTest extends TestCase
@@ -66,6 +69,33 @@ final class EnvelopeJsonCodecTest extends TestCase
         self::assertSame('subject-1', $decoded->subject->id);
         self::assertSame('actor-1', $decoded->last(EnvelopeActorAttribute::class)?->identity);
         self::assertSame('corr-1', $decoded->last(EnvelopeCorrelationAttribute::class)?->id);
+    }
+
+    public function testJsonCodecRoundTripsCustomAttributeWithEmptyPayloadObject(): void
+    {
+        $codec = new EnvelopeJsonCodec(new EnvelopeCodec(
+            new EnvelopeAttributeCodecRegistry([
+                new EnvelopeBuiltInAttributeCodec(),
+                new EnvelopeJsonEmptyAttributeCodec(),
+            ]),
+        ));
+
+        $json = $codec->encode(
+            new Envelope('subject', [new EnvelopeJsonEmptyAttribute()]),
+            static fn (mixed $value): mixed => $value,
+        );
+
+        self::assertSame(
+            '{"version":1,"subject":"subject","attributes":[{"type":"empty","payload":{}}]}',
+            $json,
+        );
+
+        $decoded = $codec->decode($json, static fn (mixed $value): mixed => $value);
+
+        self::assertInstanceOf(
+            EnvelopeJsonEmptyAttribute::class,
+            $decoded->last(EnvelopeJsonEmptyAttribute::class),
+        );
     }
 
     public function testJsonCodecRejectsSubjectEncoderThatLeavesAnObject(): void
@@ -158,5 +188,40 @@ final readonly class EnvelopeJsonTestSubject
 {
     public function __construct(public string $id)
     {
+    }
+}
+
+final readonly class EnvelopeJsonEmptyAttribute implements EnvelopeAttributeInterface
+{
+}
+
+final class EnvelopeJsonEmptyAttributeCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return $attribute instanceof EnvelopeJsonEmptyAttribute;
+    }
+
+    public function transportTypes(): array
+    {
+        return ['empty'];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        if (!$attribute instanceof EnvelopeJsonEmptyAttribute) {
+            throw new \InvalidArgumentException('Expected EnvelopeJsonEmptyAttribute.');
+        }
+
+        return new EnvelopeAttributeTransportDTO('empty', []);
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        if ('empty' !== $transport->type || [] !== $transport->payload) {
+            throw new EnvelopeTransportException('Malformed empty attribute payload.');
+        }
+
+        return new EnvelopeJsonEmptyAttribute();
     }
 }

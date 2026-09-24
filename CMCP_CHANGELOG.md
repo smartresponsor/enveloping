@@ -169,6 +169,13 @@
 - Polymorphic interface lookup remains supported, including `EnvelopeAttributeInterface::class` itself.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (57 tests, 175 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings; Canon040 reports 98.2% lines / 83.3% methods / 96.7% branches.
 
+## 2026-09-24 — empty JSON payload object round-trip milestone
+
+- Fixed a strict JSON wire asymmetry where an empty attribute payload map (`[]` in PHP) encoded as JSON array `[]` but the decoder correctly required payload wrappers to be JSON objects.
+- `EnvelopeJsonCodec` now casts each top-level attribute payload map to an object during JSON encoding, preserving `{}` for empty custom payloads without changing non-empty payload structure.
+- Added a custom empty-payload attribute/codec regression proving encode → JSON `{}` → decode round-trip.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (58 tests, 177 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings; Canon040 reports 98.5% lines / 85.4% methods / 97.0% branches.
+
 ## 2026-09-24 — RC convergence and Canon052 boundary repair
 
 - Reconnaissance covered the current Enveloping README, Composer development/production manifests, Symfony configuration, source/docblocks, tests, quality scripts, tracked documentation, and the local helper/canon contour for Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization.

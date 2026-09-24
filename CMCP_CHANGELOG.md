@@ -257,3 +257,11 @@
 - Improved the development and production Composer package descriptions without changing package identity or dependency boundaries.
 - Verification: `composer validate --strict --no-check-all` PASS; `composer validate --strict --no-check-all composer.prod.json` PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — executable release-readiness gate milestone
+
+- Added `validate:self` and `release:check` Composer scripts; `release:check` composes strict development/production manifest validation, coding-style verification, PHPStan, coverage-enabled PHPUnit, and canonical Gating.
+- Added `RELEASE_CHECKLIST.md` with explicit pre-tag, publication, clean-consumer-install, and wire-version checks.
+- Stable tagging/publication remains intentionally separate: no Git remote is configured and no `v1.0.0` tag was created by this milestone.
+- All six `release:check` constituent commands passed independently. One PHPStan run initially hit a transient `%TEMP%` cache-write error and passed immediately on isolated rerun; the aggregate Console MCP wrapper did not return a final result on repeated long-form execution, so no project failure is inferred from that wrapper behavior.
+- Verified state: both Composer manifests PASS strict validation; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
+

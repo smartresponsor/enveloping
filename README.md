@@ -58,3 +58,15 @@ Attribute lookup is polymorphic: callers may query a concrete `Envelope*Attribut
 `with()` appends context and permits repeated values of the same type. Enveloping intentionally does not declare global singleton/multi-value cardinality. When a composing use case wants singleton semantics it calls `replace()` explicitly.
 
 `without()` removes attributes compatible with the requested type, while `has()`, `last()`, and `all()` provide typed introspection. `withSubject()` explicitly rebinds the same immutable context to another subject; context propagation is therefore caller-controlled rather than automatic.
+
+## Process-boundary encoding
+
+`EnvelopeCodec` provides a transport-neutral boundary without making the core depend on Symfony Messenger or any domain repository.
+
+- the composing application owns subject encoding/decoding through explicit callbacks;
+- `EnvelopeAttributeCodec` owns typed attribute encoding/decoding;
+- `EnvelopeAttributeCodecRegistry` selects the first supporting codec;
+- `EnvelopeBuiltInAttributeCodec` handles only the generic attributes owned by Enveloping;
+- additional codecs can be registered through the `enveloping.attribute_codec` service tag without changing Envelope core.
+
+The transport DTO is intentionally dynamic only at the serialization boundary. Enveloping does not infer how a Shipment, Payment, Message, Entity, or other subject should cross a process boundary. The caller must convert such subjects to a transport-safe scalar/value representation first.

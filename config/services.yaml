@@ -5,3 +5,13 @@ services:
 
   App\Enveloping\Factory\:
     resource: '../src/Factory/'
+
+  App\Enveloping\Codec\EnvelopeBuiltInAttributeCodec:
+    tags:
+      - { name: 'enveloping.attribute_codec' }
+
+  App\Enveloping\Registry\EnvelopeAttributeCodecRegistry:
+    arguments:
+      $codecs: !tagged_iterator enveloping.attribute_codec
+
+  App\Enveloping\Codec\EnvelopeCodec: ~

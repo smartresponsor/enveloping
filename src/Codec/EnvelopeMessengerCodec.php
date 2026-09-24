@@ -21,8 +21,8 @@ final readonly class EnvelopeMessengerCodec
     }
 
     /**
-     * Wraps an object subject in a Symfony Messenger Envelope carrying one
-     * transportable Enveloping context stamp.
+     * Wraps an object subject in a Symfony Messenger Envelope carrying
+     * Enveloping context when contextual attributes are present.
      */
     public function toMessenger(ContextEnvelope $envelope): MessengerEnvelope
     {
@@ -30,17 +30,50 @@ final readonly class EnvelopeMessengerCodec
             throw new \InvalidArgumentException('Symfony Messenger messages must be objects.');
         }
 
+        return $this->withContext(
+            new MessengerEnvelope($envelope->subject),
+            $envelope,
+        );
+    }
+
+    /**
+     * Replaces Enveloping context on an existing Messenger Envelope while
+     * preserving every unrelated Messenger stamp.
+     */
+    public function withContext(MessengerEnvelope $messenger, ContextEnvelope $context): MessengerEnvelope
+    {
+        if (!\is_object($context->subject)) {
+            throw new \InvalidArgumentException('Symfony Messenger messages must be objects.');
+        }
+
+        if ($messenger->getMessage() !== $context->subject) {
+            throw new \InvalidArgumentException('Envelope context subject must be the same object as the Messenger message.');
+        }
+
+        $messenger = $this->withoutContext($messenger);
+        if ([] === $context->attributes()) {
+            return $messenger;
+        }
+
         $attributes = [];
-        foreach ($envelope->attributes() as $attribute) {
+        foreach ($context->attributes() as $attribute) {
             $attributes[] = $this->attributeCodecs->encode($attribute);
         }
 
-        return new MessengerEnvelope($envelope->subject, [
+        return $messenger->with(
             EnvelopeContextStamp::fromTransportAttributes(
                 $attributes,
                 EnvelopeTransportDTO::CURRENT_VERSION,
             ),
-        ]);
+        );
+    }
+
+    /**
+     * Removes only Enveloping context stamps from a Messenger Envelope.
+     */
+    public function withoutContext(MessengerEnvelope $messenger): MessengerEnvelope
+    {
+        return $messenger->withoutAll(EnvelopeContextStamp::class);
     }
 
     /**

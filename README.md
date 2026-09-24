@@ -86,3 +86,5 @@ When `symfony/messenger` is installed, Enveloping conditionally registers `Envel
 - Messenger remains optional at package runtime and is only a development dependency of this repository.
 
 This keeps Symfony transport metadata at the integration edge instead of leaking `StampInterface` into the Enveloping core model.
+
+The Messenger bridge also supports existing Symfony envelopes. `withContext()` replaces only `EnvelopeContextStamp`, preserving unrelated Messenger stamps; `withoutContext()` removes only Enveloping context. Empty Enveloping context clears the stamp entirely, and replacing context requires the exact same business message object to prevent context/message mismatch.

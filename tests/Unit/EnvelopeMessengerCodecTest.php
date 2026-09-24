@@ -14,6 +14,7 @@ use App\Enveloping\ValueObject\EnvelopeActorAttribute;
 use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Envelope as MessengerEnvelope;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 final class EnvelopeMessengerCodecTest extends TestCase
 {
@@ -48,6 +49,90 @@ final class EnvelopeMessengerCodecTest extends TestCase
         self::assertSame($message, $decoded->subject);
         self::assertSame('actor-1', $decoded->last(EnvelopeActorAttribute::class)?->identity);
         self::assertSame('corr-1', $decoded->last(EnvelopeCorrelationAttribute::class)?->id);
+    }
+
+    public function testContextCanReplaceExistingContextWithoutTouchingUnrelatedStamps(): void
+    {
+        $message = new EnvelopeMessengerTestMessage('message-1');
+        $delay = new DelayStamp(500);
+        $existing = new MessengerEnvelope($message, [
+            $delay,
+            new EnvelopeContextStamp([
+                ['type' => 'actor', 'payload' => ['identity' => 'old-actor']],
+            ]),
+        ]);
+
+        $updated = $this->codec->withContext(
+            $existing,
+            new Envelope($message, [
+                new EnvelopeActorAttribute('new-actor'),
+                new EnvelopeCorrelationAttribute('corr-2'),
+            ]),
+        );
+
+        self::assertSame([$delay], $updated->all(DelayStamp::class));
+        self::assertCount(1, $updated->all(EnvelopeContextStamp::class));
+        self::assertSame('new-actor', $this->codec->fromMessenger($updated)->last(EnvelopeActorAttribute::class)?->identity);
+        self::assertSame('corr-2', $this->codec->fromMessenger($updated)->last(EnvelopeCorrelationAttribute::class)?->id);
+    }
+
+    public function testEmptyContextClearsOnlyEnvelopingStamp(): void
+    {
+        $message = new EnvelopeMessengerTestMessage('message-1');
+        $delay = new DelayStamp(250);
+        $existing = new MessengerEnvelope($message, [
+            $delay,
+            new EnvelopeContextStamp([
+                ['type' => 'actor', 'payload' => ['identity' => 'actor-1']],
+            ]),
+        ]);
+
+        $cleared = $this->codec->withContext($existing, new Envelope($message));
+
+        self::assertSame([$delay], $cleared->all(DelayStamp::class));
+        self::assertSame([], $cleared->all(EnvelopeContextStamp::class));
+        self::assertSame([], $this->codec->fromMessenger($cleared)->attributes());
+    }
+
+    public function testWithoutContextPreservesUnrelatedMessengerStamps(): void
+    {
+        $message = new EnvelopeMessengerTestMessage('message-1');
+        $delay = new DelayStamp(100);
+        $existing = new MessengerEnvelope($message, [
+            $delay,
+            new EnvelopeContextStamp([
+                ['type' => 'actor', 'payload' => ['identity' => 'actor-1']],
+            ]),
+        ]);
+
+        $withoutContext = $this->codec->withoutContext($existing);
+
+        self::assertSame([$delay], $withoutContext->all(DelayStamp::class));
+        self::assertSame([], $withoutContext->all(EnvelopeContextStamp::class));
+    }
+
+    public function testContextReplacementRejectsDifferentMessageObject(): void
+    {
+        $messenger = new MessengerEnvelope(new EnvelopeMessengerTestMessage('messenger'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('same object');
+
+        $this->codec->withContext(
+            $messenger,
+            new Envelope(new EnvelopeMessengerTestMessage('context'), [
+                new EnvelopeActorAttribute('actor-1'),
+            ]),
+        );
+    }
+
+    public function testEmptyEnvelopingContextDoesNotCreateMessengerStamp(): void
+    {
+        $message = new EnvelopeMessengerTestMessage('message-1');
+
+        $messenger = $this->codec->toMessenger(new Envelope($message));
+
+        self::assertSame([], $messenger->all(EnvelopeContextStamp::class));
     }
 
     public function testMessengerEnvelopeWithoutContextStampProducesEmptyContext(): void

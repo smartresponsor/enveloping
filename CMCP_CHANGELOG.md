@@ -74,3 +74,12 @@
 - Malformed list structure, entry shape, type, payload container, payload keys, and payload values fail fast with explicit exceptions.
 - Preserved native serializability and transport DTO reconstruction behavior.
 - Verification: PHPUnit PASS (29 tests, 86 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.8% lines / 86.1% methods / 93.3% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — Messenger context composition milestone
+
+- Extended `EnvelopeMessengerCodec` to compose Enveloping context onto an existing Symfony Messenger Envelope.
+- `withContext()` removes prior `EnvelopeContextStamp` values, preserves all unrelated Messenger stamps, and adds at most one fresh Enveloping context stamp.
+- Empty context explicitly clears Enveloping stamps without creating an empty transport marker.
+- `withoutContext()` removes only Enveloping context.
+- Context replacement requires exact business-message object identity to prevent attaching context to the wrong Messenger message.
+- Verification: PHPUnit PASS (34 tests, 98 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.4% lines / 84.2% methods / 93.0% branches; Gating PASS with 0 failures and 0 warnings.

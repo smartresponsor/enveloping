@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Enveloping\Tests\Unit;
 
-use App\Enveloping\Attribute\ActorAttribute;
-use App\Enveloping\Attribute\CorrelationAttribute;
-use App\Enveloping\Attribute\OriginAttribute;
-use App\Enveloping\Envelope\Envelope;
+use App\Enveloping\ValueObject\Envelope;
+use App\Enveloping\ValueObject\EnvelopeActorAttribute;
+use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
+use App\Enveloping\ValueObject\EnvelopeOriginAttribute;
 use PHPUnit\Framework\TestCase;
 
 final class EnvelopeTest extends TestCase
@@ -18,37 +18,51 @@ final class EnvelopeTest extends TestCase
         $subject->id = 'subject-1';
 
         $envelope = new Envelope($subject, [
-            new ActorAttribute('actor-1'),
-            new OriginAttribute('checkout'),
+            new EnvelopeActorAttribute('actor-1'),
+            new EnvelopeOriginAttribute('checkout'),
         ]);
 
         self::assertSame($subject, $envelope->subject);
-        self::assertSame('actor-1', $envelope->last(ActorAttribute::class)?->identity);
-        self::assertSame('checkout', $envelope->last(OriginAttribute::class)?->source);
+        self::assertSame('actor-1', $envelope->last(EnvelopeActorAttribute::class)?->identity);
+        self::assertSame('checkout', $envelope->last(EnvelopeOriginAttribute::class)?->source);
     }
 
     public function testAttributesAreImmutableAndCanRepeatByType(): void
     {
-        $original = new Envelope('subject', [new CorrelationAttribute('first')]);
-        $extended = $original->with(new CorrelationAttribute('second'));
+        $original = new Envelope('subject', [new EnvelopeCorrelationAttribute('first')]);
+        $extended = $original->with(new EnvelopeCorrelationAttribute('second'));
 
-        self::assertSame('first', $original->last(CorrelationAttribute::class)?->id);
-        self::assertSame('second', $extended->last(CorrelationAttribute::class)?->id);
-        self::assertCount(2, $extended->all(CorrelationAttribute::class));
+        self::assertSame('first', $original->last(EnvelopeCorrelationAttribute::class)?->id);
+        self::assertSame('second', $extended->last(EnvelopeCorrelationAttribute::class)?->id);
+        self::assertCount(2, $extended->all(EnvelopeCorrelationAttribute::class));
+    }
+
+    public function testEmptyAndIntrospectionOperationsAreDeterministic(): void
+    {
+        $envelope = new Envelope('subject');
+
+        self::assertSame($envelope, $envelope->with());
+        self::assertNull($envelope->last(EnvelopeCorrelationAttribute::class));
+        self::assertSame([], $envelope->all(EnvelopeCorrelationAttribute::class));
+        self::assertSame([], $envelope->attributes());
+
+        $withCause = $envelope->with(new \App\Enveloping\ValueObject\EnvelopeCausationAttribute('cause-1'));
+        self::assertSame('cause-1', $withCause->last(\App\Enveloping\ValueObject\EnvelopeCausationAttribute::class)?->id);
+        self::assertSame($withCause->attributes(), $withCause->without(EnvelopeActorAttribute::class)->attributes());
     }
 
     public function testAttributeTypeCanBeRemovedWithoutChangingSubject(): void
     {
         $subject = new \stdClass();
         $envelope = new Envelope($subject, [
-            new ActorAttribute('actor-1'),
-            new OriginAttribute('api'),
+            new EnvelopeActorAttribute('actor-1'),
+            new EnvelopeOriginAttribute('api'),
         ]);
 
-        $withoutActor = $envelope->without(ActorAttribute::class);
+        $withoutActor = $envelope->without(EnvelopeActorAttribute::class);
 
         self::assertSame($subject, $withoutActor->subject);
-        self::assertNull($withoutActor->last(ActorAttribute::class));
-        self::assertSame('api', $withoutActor->last(OriginAttribute::class)?->source);
+        self::assertNull($withoutActor->last(EnvelopeActorAttribute::class));
+        self::assertSame('api', $withoutActor->last(EnvelopeOriginAttribute::class)?->source);
     }
 }

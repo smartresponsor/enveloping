@@ -2,5 +2,14 @@
 /var/
 /.phpunit.cache/
 /.php-cs-fixer.cache
+/.env.local
+/.env.*.local
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
+/config/reference.php
+/.gating/*
+!/.gating/README.md
 /composer.lock
 *.zip

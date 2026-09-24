@@ -32,4 +32,21 @@ Symfony Messenger stamps may later adapt Envelope attributes, but symfony/messen
 
 ## Symfony package surface
 
-The package exposes App\Enveloping\EnvelopingBundle and an EnvelopeFactory service. The core value objects remain usable without a Symfony container.
+The package exposes `App\\Enveloping\\EnvelopingBundle` and an `EnvelopeFactory` service. The core value objects remain usable without a Symfony container.
+
+The repository supports canonical dual-runtime operation:
+
+- reusable bundle composition through `EnvelopingBundle`;
+- standalone boot through `bin/console`, `Kernel`, and `config/bundles.php` for container verification and debugging.
+
+The standalone runtime does not make Enveloping a CRUD/UI application consumer. Canon022 explicitly exempts `enveloping/envelope` from the mandatory application dependency baseline, while Canon041/042 exclude its headless debug runtime from browser/UI tooling and behavioral-UI coverage requirements.
+
+## Core type vocabulary
+
+The core uses canonical technical-role-first placement:
+
+- `ValueObject/Envelope` — immutable contextual wrapper;
+- `ValueObjectInterface/EnvelopeAttributeInterface` — typed contextual value contract;
+- `EnvelopeActorAttribute`, `EnvelopeOriginAttribute`, `EnvelopeCorrelationAttribute`, and `EnvelopeCausationAttribute` — the initial deliberately small generic vocabulary.
+
+Consumer-specific contextual concepts remain outside this package until repeated cross-component use proves that they are genuinely generic.

@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Enveloping\Envelope;
+namespace App\Enveloping\ValueObject;
 
-use App\Enveloping\AttributeInterface\EnvelopeAttributeInterface;
+use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 
+/**
+ * Wraps an arbitrary subject with immutable typed execution-context values.
+ *
+ * The subject remains unaware of Enveloping and its intrinsic state is never
+ * mutated when contextual attributes are added or removed.
+ */
 final readonly class Envelope
 {
     /** @var array<class-string<EnvelopeAttributeInterface>, list<EnvelopeAttributeInterface>> */
@@ -23,6 +29,9 @@ final readonly class Envelope
         $this->attributes = $indexed;
     }
 
+    /**
+     * Returns a new envelope with additional typed contextual attributes.
+     */
     public function with(EnvelopeAttributeInterface ...$attributes): self
     {
         if ([] === $attributes) {
@@ -32,7 +41,11 @@ final readonly class Envelope
         return new self($this->subject, [...$this->flatten(), ...$attributes]);
     }
 
-    /** @template T of EnvelopeAttributeInterface
+    /**
+     * Returns the most recently attached attribute of the requested type.
+     *
+     * @template T of EnvelopeAttributeInterface
+     *
      * @param class-string<T> $attributeClass
      *
      * @return T|null
@@ -49,7 +62,11 @@ final readonly class Envelope
         return $last instanceof $attributeClass ? $last : null;
     }
 
-    /** @template T of EnvelopeAttributeInterface
+    /**
+     * Returns every attached attribute of the requested type in attachment order.
+     *
+     * @template T of EnvelopeAttributeInterface
+     *
      * @param class-string<T> $attributeClass
      *
      * @return list<T>
@@ -64,7 +81,11 @@ final readonly class Envelope
         ));
     }
 
-    /** @param class-string<EnvelopeAttributeInterface> $attributeClass */
+    /**
+     * Returns a new envelope without attributes of the requested type.
+     *
+     * @param class-string<EnvelopeAttributeInterface> $attributeClass
+     */
     public function without(string $attributeClass): self
     {
         $attributes = [];
@@ -80,7 +101,11 @@ final readonly class Envelope
         return new self($this->subject, $attributes);
     }
 
-    /** @return list<EnvelopeAttributeInterface> */
+    /**
+     * Returns every contextual attribute carried by this envelope.
+     *
+     * @return list<EnvelopeAttributeInterface>
+     */
     public function attributes(): array
     {
         return $this->flatten();

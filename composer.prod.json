@@ -6,8 +6,8 @@
   "require": {
     "php": "^8.4",
     "symfony/config": "^8.1",
-    "symfony/dependency-injection": "^8.1",
     "symfony/console": "^8.1",
+    "symfony/dependency-injection": "^8.1",
     "symfony/framework-bundle": "^8.1",
     "symfony/http-kernel": "^8.1",
     "symfony/yaml": "^8.1"
@@ -31,13 +31,8 @@
   "scripts": {
     "cs:check": "php-cs-fixer fix --dry-run --diff --verbose",
     "cs:fix": "php-cs-fixer fix --verbose",
-    "validate:prod": "composer validate --strict --no-check-all composer.prod.json",
     "phpstan": "phpstan analyse src tests --memory-limit=1G",
     "test": "phpunit --testdox",
-    "test:coverage": [
-      "@php -r \"if (!is_dir('var/coverage')) { mkdir('var/coverage', 0777, true); }\"",
-      "@php -d xdebug.mode=coverage vendor/bin/phpunit --path-coverage --coverage-text=var/coverage/summary.txt"
-    ],
     "gate": "@php vendor/bin/gating check --target=.",
     "quality": ["@cs:check", "@phpstan", "@test", "@gate"]
   },
@@ -47,21 +42,16 @@
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../Gating",
-      "options": {
-        "symlink": true,
-        "versions": {
-          "gating/gate": "dev-master"
-        }
-      }
-    }
-  ],
   "extra": {
     "symfony": {
       "require": "^8.1"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/smartresponsor/gating.git",
+      "no-api": true
+    }
+  ]
 }

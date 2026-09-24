@@ -9,9 +9,16 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
+/**
+ * Loads the minimal service configuration for reusable Enveloping composition.
+ */
 final class EnvelopingExtension extends Extension
 {
-    /** @param array<string, mixed> $configs */
+    /**
+     * Loads package services without introducing consumer-specific configuration.
+     *
+     * @param array<string, mixed> $configs
+     */
     public function load(array $configs, ContainerBuilder $container): void
     {
         unset($configs);

@@ -161,6 +161,13 @@
 - Added regression coverage for all three runtime collection boundaries.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (56 tests, 171 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — attribute class-string contract milestone
+
+- Hardened `Envelope::has()`, `last()`, `all()`, and `without()` so their documented `class-string<EnvelopeAttributeInterface>` contract is enforced at runtime.
+- Unknown classes, unrelated classes, and malformed class names now fail explicitly with `InvalidArgumentException` instead of being indistinguishable from a valid query with no matching attributes.
+- Polymorphic interface/base-class queries remain supported.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (60 tests, 181 assertions); coverage 98.5% lines / 85.4% methods / 97.1% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+
 ## 2026-09-24 — runtime attribute class-string validation milestone
 
 - Hardened `Envelope::last()`, `all()`, and `without()` so runtime callers must provide a class/interface implementing `EnvelopeAttributeInterface`; `has()` inherits the same validation through `last()`.

@@ -6,6 +6,7 @@ namespace App\Enveloping\DTO;
 
 use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
+use App\Enveloping\Validator\EnvelopeTransportTypeValidator;
 
 /**
  * Carries one encoded envelope attribute across a serialization boundary.
@@ -22,8 +23,8 @@ final readonly class EnvelopeAttributeTransportDTO
         public string $type,
         array $payload,
     ) {
-        if ('' === $type) {
-            throw new EnvelopeTransportException('Envelope attribute transport type must be non-empty.');
+        if (!EnvelopeTransportTypeValidator::isValid($type)) {
+            throw new EnvelopeTransportException('Envelope attribute transport type must match /^[a-z][a-z0-9._-]*$/.');
         }
 
         $this->payload = EnvelopeTransportPayloadValidator::normalizePayload($payload);

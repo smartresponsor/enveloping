@@ -216,6 +216,8 @@ final class EnvelopeMessengerCodecTest extends TestCase
             ['not-a-list' => []],
             ['invalid-entry'],
             [['type' => '', 'payload' => []]],
+            [['type' => 'Actor', 'payload' => []]],
+            [['type' => 'actor/type', 'payload' => []]],
             [['type' => 'actor', 'payload' => 'invalid']],
             [['type' => 'actor', 'payload' => [0 => 'invalid-key']]],
             [['type' => 'actor', 'payload' => ['value' => new \stdClass()]]],

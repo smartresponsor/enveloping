@@ -8,6 +8,7 @@ use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\DTO\EnvelopeTransportDTO;
 use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
+use App\Enveloping\Validator\EnvelopeTransportTypeValidator;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
 /**
@@ -49,8 +50,8 @@ final readonly class EnvelopeContextStamp implements StampInterface
             $type = $attribute['type'] ?? null;
             $payload = $attribute['payload'] ?? null;
 
-            if (!\is_string($type) || '' === $type) {
-                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d requires a non-empty type.', $index));
+            if (!\is_string($type) || !EnvelopeTransportTypeValidator::isValid($type)) {
+                throw new EnvelopeTransportException(\sprintf('Envelope context stamp attribute %d requires a valid transport type.', $index));
             }
 
             if (!\is_array($payload)) {

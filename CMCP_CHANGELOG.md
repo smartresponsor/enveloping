@@ -143,3 +143,12 @@
 - JSON subject encoding benefits from the same validator and now rejects non-finite subjects before native `json_encode()` is invoked.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (51 tests, 144 assertions); coverage 97.24% lines / 78.26% methods / 93.55% branches.
 - Canon052 remains the only known Gating blocker because of the preserved pre-existing `.gating/` consumer-tree state; no `.gating` files were changed by this milestone.
+
+## 2026-09-24 — stable wire type grammar milestone
+
+- Added `EnvelopeTransportTypeValidator` as the shared grammar check for stable attribute wire identifiers.
+- Wire type IDs must match `^[a-z][a-z0-9._-]*$`, preserving current built-in and custom examples while rejecting whitespace, uppercase, path-like, and ad-hoc punctuation forms.
+- `EnvelopeAttributeTransportDTO`, `EnvelopeAttributeCodecRegistry`, and `EnvelopeContextStamp` now enforce the same grammar with boundary-appropriate typed exceptions.
+- PHPStan assertion metadata exposes the validator's non-empty-string guarantee without duplicating runtime checks.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (53 tests, 164 assertions); coverage 98.17% lines / 82.98% methods / 96.43% branches.
+- Full Gating PASS: 70 rules, 0 failures, 0 warnings. The previously observed Canon052 consumer-artifact blocker was resolved by the concurrent tooling state; this milestone did not modify `.gating`.

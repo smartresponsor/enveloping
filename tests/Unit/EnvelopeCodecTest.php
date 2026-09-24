@@ -13,7 +13,9 @@ use App\Enveloping\Exception\EnvelopeTransportException;
 use App\Enveloping\Registry\EnvelopeAttributeCodecRegistry;
 use App\Enveloping\ValueObject\Envelope;
 use App\Enveloping\ValueObject\EnvelopeActorAttribute;
+use App\Enveloping\ValueObject\EnvelopeCausationAttribute;
 use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
+use App\Enveloping\ValueObject\EnvelopeOriginAttribute;
 use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -78,7 +80,7 @@ final class EnvelopeCodecTest extends TestCase
     public function testEmptyTransportTypeOwnershipIsRejected(): void
     {
         $this->expectException(EnvelopeCodecException::class);
-        $this->expectExceptionMessage('transport type must be non-empty');
+        $this->expectExceptionMessage('transport type must match');
 
         new EnvelopeAttributeCodecRegistry([
             new EnvelopeEmptyTypeCodec(),
@@ -193,6 +195,18 @@ final class EnvelopeCodecTest extends TestCase
         new EnvelopeAttributeTransportDTO('invalid', ['value' => $value]);
     }
 
+    public function testTransportDTORejectsInvalidWireTypeGrammar(): void
+    {
+        foreach (['', ' Actor', 'Actor', 'actor/type', 'actor type', 'actor:tag'] as $type) {
+            try {
+                new EnvelopeAttributeTransportDTO($type, []);
+                self::fail('Invalid wire type must be rejected.');
+            } catch (EnvelopeTransportException $exception) {
+                self::assertStringContainsString('transport type must match', $exception->getMessage());
+            }
+        }
+    }
+
     public function testTransportDTORejectsEmptyAttributeType(): void
     {
         $this->expectException(EnvelopeTransportException::class);
@@ -246,6 +260,36 @@ final class EnvelopeCodecTest extends TestCase
         $this->expectException(EnvelopeTransportException::class);
 
         new \App\Enveloping\DTO\EnvelopeTransportDTO('subject', [], 0);
+    }
+
+    public function testBuiltInCodecCoversItsCompleteOwnedVocabulary(): void
+    {
+        $codec = new EnvelopeBuiltInAttributeCodec();
+        $attributes = [
+            new EnvelopeActorAttribute('actor-1'),
+            new EnvelopeOriginAttribute('origin-1'),
+            new EnvelopeCorrelationAttribute('correlation-1'),
+            new EnvelopeCausationAttribute('causation-1'),
+        ];
+
+        self::assertSame(['actor', 'causation', 'correlation', 'origin'], $codec->transportTypes());
+
+        foreach ($attributes as $attribute) {
+            self::assertTrue($codec->supportsAttribute($attribute));
+
+            $transport = $codec->encode($attribute);
+            $decoded = $codec->decode($transport);
+
+            self::assertSame($attribute::class, $decoded::class);
+        }
+
+        $unsupported = new EnvelopeTestAttribute('unsupported');
+        self::assertFalse($codec->supportsAttribute($unsupported));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported envelope attribute');
+
+        $codec->encode($unsupported);
     }
 
     public function testBuiltInCodecRejectsMalformedPayloadAndUnknownTypes(): void

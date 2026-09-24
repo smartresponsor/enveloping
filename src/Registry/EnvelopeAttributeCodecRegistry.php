@@ -7,6 +7,7 @@ namespace App\Enveloping\Registry;
 use App\Enveloping\Codec\EnvelopeAttributeCodec;
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\Exception\EnvelopeCodecException;
+use App\Enveloping\Validator\EnvelopeTransportTypeValidator;
 use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
 
 /**
@@ -40,8 +41,8 @@ final readonly class EnvelopeAttributeCodecRegistry
             $codecTypes = [];
 
             foreach ($codec->transportTypes() as $type) {
-                if ('' === $type) {
-                    throw new EnvelopeCodecException('Envelope attribute codec transport type must be non-empty.');
+                if (!EnvelopeTransportTypeValidator::isValid($type)) {
+                    throw new EnvelopeCodecException('Envelope attribute codec transport type must match /^[a-z][a-z0-9._-]*$/.');
                 }
 
                 if (isset($byType[$type])) {

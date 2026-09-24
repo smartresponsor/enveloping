@@ -77,7 +77,7 @@ The transport DTO is intentionally dynamic only at the serialization boundary. E
 
 Attribute payloads support recursive JSON-safe values: `null`, booleans, integers, finite floats, valid UTF-8 strings, lists, and string-key maps containing the same value forms. Objects, resources, non-string map keys, non-finite floats, invalid UTF-8 strings, and nesting deeper than 512 levels are rejected at the boundary. Payload maps are normalized before storage in transport DTOs or Messenger stamps.
 
-The wire contract is decoupled from PHP class names. Built-in attributes use stable transport type identifiers (`actor`, `origin`, `correlation`, `causation`), and custom codecs own their own stable type identifiers. `EnvelopeTransportDTO` carries an explicit format version; the current version is `1`, and unsupported versions are rejected during decoding.
+The wire contract is decoupled from PHP class names. Built-in attributes use stable transport type identifiers (`actor`, `origin`, `correlation`, `causation`), and custom codecs own their own stable type identifiers. Wire type identifiers use the lowercase ASCII grammar `^[a-z][a-z0-9._-]*$`; whitespace, uppercase, slash-delimited, and other ad-hoc labels are rejected at both codec registration and transport input boundaries. `EnvelopeTransportDTO` carries an explicit format version; the current version is `1`, and unsupported versions are rejected during decoding.
 
 ## Optional Symfony Messenger bridge
 

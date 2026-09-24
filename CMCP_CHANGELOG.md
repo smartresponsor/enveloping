@@ -176,6 +176,13 @@
 - Service visibility remains private/autowired, which is intentional: consumers inject these services rather than fetching them from the container.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (60 tests, 184 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — optional Messenger manifest contract milestone
+
+- Added regression coverage across both `composer.json` and `composer.prod.json` proving `symfony/messenger` is not a runtime `require` dependency.
+- Messenger remains a `require-dev` dependency for this repository's own bridge tests and a `suggest` entry for consumers.
+- This protects Enveloping's runtime independence: installing the package with production dependencies does not force Symfony Messenger.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (61 tests, 200 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
+
 ## 2026-09-24 — runtime attribute class-string validation milestone
 
 - Hardened `Envelope::last()`, `all()`, and `without()` so runtime callers must provide a class/interface implementing `EnvelopeAttributeInterface`; `has()` inherits the same validation through `last()`.

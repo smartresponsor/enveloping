@@ -39,6 +39,29 @@ final class EnvelopingBundleTest extends TestCase
         );
     }
 
+    public function testMessengerRemainsOptionalInDevelopmentAndProductionManifests(): void
+    {
+        foreach (['composer.json', 'composer.prod.json'] as $manifestName) {
+            $json = file_get_contents(\dirname(__DIR__, 2).'/'.$manifestName);
+            self::assertIsString($json);
+
+            $manifest = json_decode($json, true, 512, \JSON_THROW_ON_ERROR);
+
+            self::assertIsArray($manifest);
+
+            $require = $manifest['require'] ?? null;
+            $requireDev = $manifest['require-dev'] ?? null;
+            $suggest = $manifest['suggest'] ?? null;
+
+            self::assertIsArray($require);
+            self::assertIsArray($requireDev);
+            self::assertIsArray($suggest);
+            self::assertArrayNotHasKey('symfony/messenger', $require);
+            self::assertSame('^8.1', $requireDev['symfony/messenger'] ?? null);
+            self::assertArrayHasKey('symfony/messenger', $suggest);
+        }
+    }
+
     public function testExtensionLoadsPackageParametersAndFactoryService(): void
     {
         $container = new ContainerBuilder();

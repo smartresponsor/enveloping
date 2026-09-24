@@ -120,6 +120,44 @@ final class EnvelopeCodecTest extends TestCase
         $registry->encode($attribute);
     }
 
+    public function testTransportDTOAcceptsRecursiveJsonSafePayload(): void
+    {
+        $transport = new EnvelopeAttributeTransportDTO('nested', [
+            'map' => [
+                'enabled' => true,
+                'threshold' => 1.5,
+                'nested' => ['value' => 'ok'],
+            ],
+            'list' => [1, 'two', null, ['three' => 3]],
+        ]);
+
+        self::assertSame([
+            'map' => [
+                'enabled' => true,
+                'threshold' => 1.5,
+                'nested' => ['value' => 'ok'],
+            ],
+            'list' => [1, 'two', null, ['three' => 3]],
+        ], $transport->payload);
+    }
+
+    public function testTransportDTORejectsNonJsonSafePayload(): void
+    {
+        $cases = [
+            ['object' => new \stdClass()],
+            ['sparse-map' => [1 => 'numeric-key']],
+        ];
+
+        foreach ($cases as $payload) {
+            try {
+                new EnvelopeAttributeTransportDTO('invalid', $payload);
+                self::fail('Non JSON-safe transport payload should be rejected.');
+            } catch (\InvalidArgumentException) {
+                self::addToAssertionCount(1);
+            }
+        }
+    }
+
     public function testTransportDTORejectsEmptyAttributeType(): void
     {
         $this->expectException(\InvalidArgumentException::class);

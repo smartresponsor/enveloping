@@ -91,3 +91,11 @@
 - Preserved unique transport type ownership on decode, making encode/decode ownership symmetric and deterministic.
 - Added regression coverage for ambiguous runtime ownership and undeclared emitted wire types.
 - Verification: PHPUnit PASS (36 tests, 102 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.1% lines / 84.2% methods / 93.3% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — recursive JSON-safe payload milestone
+
+- Expanded attribute transport payloads from flat scalar/null maps to recursive JSON-safe structures: null, scalar values, lists, and string-key maps.
+- Added `EnvelopeTransportPayloadValidator` as the shared boundary validator/normalizer used by both `EnvelopeAttributeTransportDTO` and `EnvelopeContextStamp`.
+- Transport payload maps are normalized to string-key maps before storage; objects, resources, and non-string map keys are rejected.
+- Added regression coverage for nested map/list payloads, native stamp serialization, object values, and invalid map keys.
+- Verification: PHPUnit PASS (39 tests, 108 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.3% lines / 85.0% methods / 93.9% branches; Gating PASS with 0 failures and 0 warnings.

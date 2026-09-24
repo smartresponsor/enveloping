@@ -75,6 +75,8 @@ Attribute lookup is polymorphic: callers may query a concrete `Envelope*Attribut
 
 The transport DTO is intentionally dynamic only at the serialization boundary. Enveloping does not infer how a Shipment, Payment, Message, Entity, or other subject should cross a process boundary. The caller must convert such subjects to a transport-safe scalar/value representation first.
 
+Attribute payloads support recursive JSON-safe values: `null`, booleans, integers, floats, strings, lists, and string-key maps containing the same value forms. Objects, resources, and non-string map keys are rejected at the boundary. Payload maps are normalized before storage in transport DTOs or Messenger stamps.
+
 The wire contract is decoupled from PHP class names. Built-in attributes use stable transport type identifiers (`actor`, `origin`, `correlation`, `causation`), and custom codecs own their own stable type identifiers. `EnvelopeTransportDTO` carries an explicit format version; the current version is `1`, and unsupported versions are rejected during decoding.
 
 ## Optional Symfony Messenger bridge

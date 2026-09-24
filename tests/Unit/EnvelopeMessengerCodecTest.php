@@ -183,6 +183,32 @@ final class EnvelopeMessengerCodecTest extends TestCase
         ));
     }
 
+    public function testContextStampAcceptsRecursiveJsonSafePayload(): void
+    {
+        $stamp = new EnvelopeContextStamp([
+            [
+                'type' => 'custom',
+                'payload' => [
+                    'options' => [
+                        'channels' => ['sms', 'email'],
+                        'flags' => ['urgent' => true],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertSame([
+            'options' => [
+                'channels' => ['sms', 'email'],
+                'flags' => ['urgent' => true],
+            ],
+        ], $stamp->attributes[0]['payload']);
+
+        $copy = unserialize(serialize($stamp));
+        self::assertInstanceOf(EnvelopeContextStamp::class, $copy);
+        self::assertSame($stamp->attributes, $copy->attributes);
+    }
+
     public function testContextStampRejectsMalformedAttributeShape(): void
     {
         $cases = [
@@ -191,7 +217,7 @@ final class EnvelopeMessengerCodecTest extends TestCase
             [['type' => '', 'payload' => []]],
             [['type' => 'actor', 'payload' => 'invalid']],
             [['type' => 'actor', 'payload' => [0 => 'invalid-key']]],
-            [['type' => 'actor', 'payload' => ['value' => ['invalid-value']]]],
+            [['type' => 'actor', 'payload' => ['value' => new \stdClass()]]],
         ];
 
         foreach ($cases as $attributes) {

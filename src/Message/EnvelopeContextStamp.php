@@ -6,6 +6,7 @@ namespace App\Enveloping\Message;
 
 use App\Enveloping\DTO\EnvelopeAttributeTransportDTO;
 use App\Enveloping\DTO\EnvelopeTransportDTO;
+use App\Enveloping\Validator\EnvelopeTransportPayloadValidator;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
 /**
@@ -14,7 +15,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  */
 final readonly class EnvelopeContextStamp implements StampInterface
 {
-    /** @var list<array{type:non-empty-string,payload:array<string, scalar|null>}> */
+    /** @var list<array{type:non-empty-string,payload:array<string, mixed>}> */
     public array $attributes;
 
     /**
@@ -49,10 +50,10 @@ final readonly class EnvelopeContextStamp implements StampInterface
                 throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d requires an array payload.', $index));
             }
 
-            foreach ($payload as $key => $value) {
-                if (!\is_string($key) || !(null === $value || \is_scalar($value))) {
-                    throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d payload must contain only string keys and scalar/null values.', $index));
-                }
+            try {
+                $payload = EnvelopeTransportPayloadValidator::normalizePayload($payload);
+            } catch (\InvalidArgumentException $exception) {
+                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d has invalid payload: %s', $index, $exception->getMessage()), previous: $exception);
             }
 
             $normalized[] = [

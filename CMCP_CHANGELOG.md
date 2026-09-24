@@ -248,3 +248,12 @@
 - This closes the product path without forcing a dependency into a concurrently modified external consumer repository.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — market-facing release package milestone
+
+- Added a root `LICENSE` notice aligned with the Composer-declared `PolyForm-Noncommercial-1.0.0` license and canonical official license URL.
+- Added product-facing `CHANGELOG.md`; CMCP orchestration history remains separate from consumer-facing release notes.
+- Added installation and quick-start documentation covering standalone use, explicit context propagation, and optional Messenger installation.
+- Corrected stale README language from the pre-Messenger phase and documented deterministic codec ownership instead of historical first-match semantics.
+- Improved the development and production Composer package descriptions without changing package identity or dependency boundaries.
+- Verification: `composer validate --strict --no-check-all` PASS; `composer validate --strict --no-check-all composer.prod.json` PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (71 tests, 228 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+

@@ -2,6 +2,52 @@
 
 Enveloping is a Symfony-oriented foundation component for attaching typed contextual semantics to a subject without changing that subject's intrinsic state.
 
+## Installation
+
+The package name is `enveloping/envelope`.
+
+After publication to a Composer repository:
+
+```bash
+composer require enveloping/envelope
+```
+
+Symfony Messenger is optional. Install it only when using the Messenger bridge:
+
+```bash
+composer require symfony/messenger
+```
+
+For local workspace development, use a Composer path repository pointing to the
+Enveloping checkout and require `enveloping/envelope:dev-master`.
+
+## Quick start
+
+```php
+use App\Enveloping\Factory\EnvelopeFactory;
+use App\Enveloping\ValueObject\EnvelopeActorAttribute;
+use App\Enveloping\ValueObject\EnvelopeCorrelationAttribute;
+
+$factory = new EnvelopeFactory();
+
+$parent = $factory->create(
+    $request,
+    new EnvelopeActorAttribute('user-42'),
+    new EnvelopeCorrelationAttribute('corr-123'),
+);
+
+$child = $factory
+    ->inheritOnly(
+        $parent,
+        $message,
+        EnvelopeCorrelationAttribute::class,
+    )
+    ->replace(new EnvelopeActorAttribute('worker'));
+```
+
+Nothing in `$request` or `$message` needs to implement an Enveloping
+interface. Context propagation is explicit.
+
 ## Canonical responsibility
 
 Enveloping owns how execution context is attached. It does not own the business meaning or lifecycle of consumer objects.
@@ -28,7 +74,7 @@ Domain-specific facts such as a payment provider, shipping carrier, message reci
 
 The core is ephemeral and persistence-agnostic. It owns no Doctrine entities, migrations, CRUD surface, audit store, or execution-history database.
 
-Symfony Messenger stamps may later adapt Envelope attributes, but symfony/messenger is intentionally not a core dependency.
+Symfony Messenger is supported through an optional adapter layer; `symfony/messenger` is intentionally not a core runtime dependency.
 
 ## Symfony package surface
 
@@ -67,7 +113,7 @@ Parent-to-child propagation is explicit through `EnvelopeFactory`: `create()` in
 
 - the composing application owns subject encoding/decoding through explicit callbacks;
 - `EnvelopeAttributeCodec` owns typed attribute encoding/decoding;
-- `EnvelopeAttributeCodecRegistry` selects the first supporting codec;
+- `EnvelopeAttributeCodecRegistry` enforces unique runtime and wire-type codec ownership;
 - `EnvelopeBuiltInAttributeCodec` handles only the generic attributes owned by Enveloping;
 - additional codecs can be registered through the `enveloping.attribute_codec` service tag without changing Envelope core;
 - implementations of `EnvelopeAttributeCodec` are autoconfigured into that tag;

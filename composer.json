@@ -1,6 +1,6 @@
 {
   "name": "enveloping/envelope",
-  "description": "Symfony-oriented contextual envelope primitives",
+  "description": "Typed execution-context envelopes with transport-neutral codecs and optional Symfony Messenger integration",
   "type": "symfony-bundle",
   "license": "PolyForm-Noncommercial-1.0.0",
   "require": {

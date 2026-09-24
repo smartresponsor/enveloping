@@ -83,6 +83,31 @@ final class EnvelopeCodecTest extends TestCase
         ]);
     }
 
+    public function testRuntimeAttributeOwnershipMustBeUnique(): void
+    {
+        $registry = new EnvelopeAttributeCodecRegistry([
+            new EnvelopeTestAttributeCodec(),
+            new EnvelopeSecondRuntimeOwnerCodec(),
+        ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('supported by multiple codecs');
+
+        $registry->encode(new EnvelopeTestAttribute('value'));
+    }
+
+    public function testCodecCannotEmitUndeclaredTransportType(): void
+    {
+        $registry = new EnvelopeAttributeCodecRegistry([
+            new EnvelopeUndeclaredOutputCodec(),
+        ]);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('emitted undeclared transport type');
+
+        $registry->encode(new EnvelopeTestAttribute('value'));
+    }
+
     public function testUnsupportedAttributeFailsAtSerializationBoundary(): void
     {
         $registry = new EnvelopeAttributeCodecRegistry([]);
@@ -209,5 +234,51 @@ final class EnvelopeEmptyTypeCodec implements EnvelopeAttributeCodec
     public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
     {
         throw new \LogicException('Not used.');
+    }
+}
+
+final class EnvelopeSecondRuntimeOwnerCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return $attribute instanceof EnvelopeTestAttribute;
+    }
+
+    public function transportTypes(): array
+    {
+        return ['second-test'];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        return new EnvelopeAttributeTransportDTO('second-test', ['value' => 'unused']);
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        return new EnvelopeTestAttribute('unused');
+    }
+}
+
+final class EnvelopeUndeclaredOutputCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return $attribute instanceof EnvelopeTestAttribute;
+    }
+
+    public function transportTypes(): array
+    {
+        return ['declared'];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        return new EnvelopeAttributeTransportDTO('undeclared', ['value' => 'value']);
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        return new EnvelopeTestAttribute('unused');
     }
 }

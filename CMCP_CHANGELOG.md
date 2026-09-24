@@ -83,3 +83,11 @@
 - `withoutContext()` removes only Enveloping context.
 - Context replacement requires exact business-message object identity to prevent attaching context to the wrong Messenger message.
 - Verification: PHPUnit PASS (34 tests, 98 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.4% lines / 84.2% methods / 93.0% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — symmetric codec ownership milestone
+
+- Hardened `EnvelopeAttributeCodecRegistry` so runtime attribute encoding must resolve to exactly one supporting codec instead of first-wins behavior.
+- Registry now validates that a codec emits only transport types declared by its own `transportTypes()` contract.
+- Preserved unique transport type ownership on decode, making encode/decode ownership symmetric and deterministic.
+- Added regression coverage for ambiguous runtime ownership and undeclared emitted wire types.
+- Verification: PHPUnit PASS (36 tests, 102 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.1% lines / 84.2% methods / 93.3% branches; Gating PASS with 0 failures and 0 warnings.

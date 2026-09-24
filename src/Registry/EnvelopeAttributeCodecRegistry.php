@@ -12,6 +12,7 @@ use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
  * Selects attribute codecs without teaching Enveloping about consumer domains.
  *
  * Transport type ownership is indexed once and must be globally unambiguous.
+ * Runtime attribute encoding must also resolve to exactly one codec.
  */
 final readonly class EnvelopeAttributeCodecRegistry
 {
@@ -21,14 +22,21 @@ final readonly class EnvelopeAttributeCodecRegistry
     /** @var array<non-empty-string, EnvelopeAttributeCodec> */
     private array $codecsByType;
 
+    /**
+     * @var array<int, list<non-empty-string>>
+     */
+    private array $typesByCodec;
+
     /** @param iterable<EnvelopeAttributeCodec> $codecs */
     public function __construct(iterable $codecs)
     {
         $normalized = [];
         $byType = [];
+        $typesByCodec = [];
 
         foreach ($codecs as $codec) {
             $normalized[] = $codec;
+            $codecTypes = [];
 
             foreach ($codec->transportTypes() as $type) {
                 if ('' === $type) {
@@ -40,25 +48,46 @@ final readonly class EnvelopeAttributeCodecRegistry
                 }
 
                 $byType[$type] = $codec;
+                $codecTypes[] = $type;
             }
+
+            $typesByCodec[spl_object_id($codec)] = $codecTypes;
         }
 
         $this->codecs = $normalized;
         $this->codecsByType = $byType;
+        $this->typesByCodec = $typesByCodec;
     }
 
     /**
-     * Delegates encoding to the first registered codec that supports the runtime attribute.
+     * Encodes a runtime attribute only when exactly one registered codec owns it.
      */
     public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
     {
+        $owner = null;
+
         foreach ($this->codecs as $codec) {
-            if ($codec->supportsAttribute($attribute)) {
-                return $codec->encode($attribute);
+            if (!$codec->supportsAttribute($attribute)) {
+                continue;
             }
+
+            if (null !== $owner) {
+                throw new \InvalidArgumentException(\sprintf('Envelope attribute %s is supported by multiple codecs.', $attribute::class));
+            }
+
+            $owner = $codec;
         }
 
-        throw new \InvalidArgumentException('No envelope attribute codec supports '.$attribute::class.'.');
+        if (null === $owner) {
+            throw new \InvalidArgumentException('No envelope attribute codec supports '.$attribute::class.'.');
+        }
+
+        $transport = $owner->encode($attribute);
+        if (!\in_array($transport->type, $this->typesByCodec[spl_object_id($owner)] ?? [], true)) {
+            throw new \LogicException(\sprintf('Envelope attribute codec %s emitted undeclared transport type %s.', $owner::class, $transport->type));
+        }
+
+        return $transport;
     }
 
     /**

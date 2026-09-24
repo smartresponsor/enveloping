@@ -69,7 +69,9 @@ Attribute lookup is polymorphic: callers may query a concrete `Envelope*Attribut
 - `EnvelopeBuiltInAttributeCodec` handles only the generic attributes owned by Enveloping;
 - additional codecs can be registered through the `enveloping.attribute_codec` service tag without changing Envelope core;
 - implementations of `EnvelopeAttributeCodec` are autoconfigured into that tag;
-- every codec declares the stable wire type IDs it owns, and duplicate or empty type ownership is rejected at registry construction.
+- every codec declares the stable wire type IDs it owns, and duplicate or empty type ownership is rejected at registry construction;
+- runtime attribute encoding must resolve to exactly one codec;
+- a codec may emit only wire type IDs declared by its own `transportTypes()` contract.
 
 The transport DTO is intentionally dynamic only at the serialization boundary. Enveloping does not infer how a Shipment, Payment, Message, Entity, or other subject should cross a process boundary. The caller must convert such subjects to a transport-safe scalar/value representation first.
 

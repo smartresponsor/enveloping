@@ -133,3 +133,13 @@
 - Preserved the public wire version and subject contract.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (47 tests, 136 assertions); coverage 97.8% lines / 82.6% methods / 94.4% branches.
 - Gating is currently blocked only by Canon052 because the pre-existing/concurrently modified `.gating/` consumer tree is no longer considered artifact-only by the current Gating rule. `.gating/README.md` was already dirty before this milestone and was deliberately preserved.
+
+## 2026-09-24 — complete JSON-safe value validation milestone
+
+- Tightened `EnvelopeTransportPayloadValidator` so “JSON-safe” now matches real JSON constraints instead of only PHP scalar/array shapes.
+- Non-finite floats (`NAN`, `INF`, `-INF`) are rejected before adapter-specific serialization.
+- Strings must be valid UTF-8.
+- Recursive payload traversal is bounded at 512 levels, preventing runaway recursion/cyclic-reference style failure modes from escaping the transport boundary.
+- JSON subject encoding benefits from the same validator and now rejects non-finite subjects before native `json_encode()` is invoked.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (51 tests, 144 assertions); coverage 97.24% lines / 78.26% methods / 93.55% branches.
+- Canon052 remains the only known Gating blocker because of the preserved pre-existing `.gating/` consumer-tree state; no `.gating` files were changed by this milestone.

@@ -160,6 +160,39 @@ final class EnvelopeCodecTest extends TestCase
         }
     }
 
+    public function testTransportPayloadRejectsNonFiniteFloats(): void
+    {
+        foreach ([\NAN, \INF, -\INF] as $value) {
+            try {
+                new EnvelopeAttributeTransportDTO('invalid', ['value' => $value]);
+                self::fail('Non-finite floats must be rejected.');
+            } catch (EnvelopeTransportException $exception) {
+                self::assertStringContainsString('floats must be finite', $exception->getMessage());
+            }
+        }
+    }
+
+    public function testTransportPayloadRejectsInvalidUtf8Strings(): void
+    {
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('valid UTF-8');
+
+        new EnvelopeAttributeTransportDTO('invalid', ['value' => "\xB1\x31"]);
+    }
+
+    public function testTransportPayloadRejectsExcessiveNesting(): void
+    {
+        $value = 'leaf';
+        for ($index = 0; $index < 513; ++$index) {
+            $value = [$value];
+        }
+
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('nesting must not exceed 512 levels');
+
+        new EnvelopeAttributeTransportDTO('invalid', ['value' => $value]);
+    }
+
     public function testTransportDTORejectsEmptyAttributeType(): void
     {
         $this->expectException(EnvelopeTransportException::class);

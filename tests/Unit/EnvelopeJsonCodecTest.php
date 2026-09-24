@@ -79,7 +79,7 @@ final class EnvelopeJsonCodecTest extends TestCase
         );
     }
 
-    public function testJsonCodecWrapsNativeJsonFailuresAsTransportExceptions(): void
+    public function testJsonCodecWrapsNativeJsonDecodingFailureAsTransportException(): void
     {
         try {
             $this->codec->decode('{', static fn (mixed $value): mixed => $value);
@@ -87,16 +87,17 @@ final class EnvelopeJsonCodecTest extends TestCase
         } catch (EnvelopeTransportException $exception) {
             self::assertInstanceOf(\JsonException::class, $exception->getPrevious());
         }
+    }
 
-        try {
-            $this->codec->encode(
-                new Envelope(\NAN),
-                static fn (mixed $value): mixed => $value,
-            );
-            self::fail('Non-encodable JSON value must fail.');
-        } catch (EnvelopeTransportException $exception) {
-            self::assertInstanceOf(\JsonException::class, $exception->getPrevious());
-        }
+    public function testJsonCodecRejectsNonFiniteEncodedSubjectBeforeNativeJsonEncoding(): void
+    {
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('floats must be finite');
+
+        $this->codec->encode(
+            new Envelope(\NAN),
+            static fn (mixed $value): mixed => $value,
+        );
     }
 
     public function testJsonCodecRejectsMalformedEnvelopeDocumentShapes(): void

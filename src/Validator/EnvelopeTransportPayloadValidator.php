@@ -11,6 +11,8 @@ use App\Enveloping\Exception\EnvelopeTransportException;
  */
 final class EnvelopeTransportPayloadValidator
 {
+    private const int MAX_DEPTH = 512;
+
     /**
      * @param array<mixed, mixed> $payload
      *
@@ -35,9 +37,25 @@ final class EnvelopeTransportPayloadValidator
     /**
      * Validates one arbitrary JSON-safe transport value.
      */
-    public static function assertValue(mixed $value): void
+    public static function assertValue(mixed $value, int $depth = 0): void
     {
-        if (null === $value || \is_scalar($value)) {
+        if (null === $value || \is_bool($value) || \is_int($value)) {
+            return;
+        }
+
+        if (\is_float($value)) {
+            if (!is_finite($value)) {
+                throw new EnvelopeTransportException('Envelope transport payload floats must be finite.');
+            }
+
+            return;
+        }
+
+        if (\is_string($value)) {
+            if (1 !== preg_match('//u', $value)) {
+                throw new EnvelopeTransportException('Envelope transport payload strings must be valid UTF-8.');
+            }
+
             return;
         }
 
@@ -45,9 +63,13 @@ final class EnvelopeTransportPayloadValidator
             throw new EnvelopeTransportException('Envelope transport payload values must be JSON-safe.');
         }
 
+        if ($depth >= self::MAX_DEPTH) {
+            throw new EnvelopeTransportException(\sprintf('Envelope transport payload nesting must not exceed %d levels.', self::MAX_DEPTH));
+        }
+
         if (array_is_list($value)) {
             foreach ($value as $item) {
-                self::assertValue($item);
+                self::assertValue($item, $depth + 1);
             }
 
             return;
@@ -58,7 +80,7 @@ final class EnvelopeTransportPayloadValidator
                 throw new EnvelopeTransportException('Envelope transport payload map keys must be strings.');
             }
 
-            self::assertValue($item);
+            self::assertValue($item, $depth + 1);
         }
     }
 }

@@ -48,3 +48,13 @@
 - Added `EnvelopeTransportDTO::CURRENT_VERSION = 1` and explicit rejection of unsupported transport versions.
 - Custom attribute codecs own their transport type identifiers without modifying Enveloping core.
 - Verification: PHPUnit PASS (19 tests, 57 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 96.1% lines / 83.3% methods / 89.1% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — optional Symfony Messenger bridge milestone
+
+- Verified the current Symfony Messenger Envelope/Stamp model before implementing the bridge.
+- Added `EnvelopeContextStamp` as the only Messenger-specific context carrier; the underlying business message remains unchanged.
+- Added `EnvelopeMessengerCodec` to translate between Enveloping and Symfony Messenger Envelopes using the stable versioned attribute wire contract.
+- Kept `symfony/messenger` optional at runtime: it is suggested by the package and installed only in development; Messenger services load conditionally when `StampInterface` is available.
+- Added subject-prefixed `config/envelope_messenger.yaml` and verified real container wiring with `debug:container App\\Enveloping\\Codec\\EnvelopeMessengerCodec`.
+- Added tests for round-trip context, missing stamps, invalid subjects, invalid versions, stamp serialization, and transport attribute reconstruction.
+- Verification: Composer dev/prod validation PASS; PHPUnit PASS (25 tests, 74 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.3% lines / 86.1% methods / 91.1% branches; Gating PASS with 0 failures and 0 warnings.

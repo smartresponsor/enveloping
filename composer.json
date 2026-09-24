@@ -16,7 +16,11 @@
     "friendsofphp/php-cs-fixer": ">=3.95 <4.0",
     "gating/gate": "dev-master",
     "phpstan/phpstan": "^2.0",
-    "phpunit/phpunit": "^12.0"
+    "phpunit/phpunit": "^12.0",
+    "symfony/messenger": "^8.1"
+  },
+  "suggest": {
+    "symfony/messenger": "Enables the optional Symfony Messenger bridge for Envelope context stamps."
   },
   "autoload": {
     "psr-4": {

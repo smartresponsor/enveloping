@@ -27,6 +27,10 @@ final class EnvelopingExtension extends Extension
 
         $loader = new YamlFileLoader($container, new FileLocator(\dirname(__DIR__, 2).'/config'));
         $loader->load('services.yaml');
+
+        if (interface_exists(\Symfony\Component\Messenger\Stamp\StampInterface::class)) {
+            $loader->load('envelope_messenger.yaml');
+        }
     }
 
     public function getAlias(): string

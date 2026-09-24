@@ -224,3 +224,11 @@
 - Final acceptance exposed an Xdebug-dependent defect in the 512-level JSON-safe nesting guard: recursive validation could hit the runtime stack guard before Enveloping raised its typed transport exception. Replaced recursive traversal with an explicit typed work stack so the declared depth contract is runtime-independent.
 - Final executable acceptance: `composer quality` PASS; PHPUnit 56/56 tests with 171 assertions; Canon040 PASS at 98.2% lines / 83.0% methods / 96.6% branches; Canon052 PASS; full Gating PASS with no failed rules.
 
+## 2026-09-24 — explicit context propagation product milestone
+
+- Added explicit parent-to-child propagation to `EnvelopeFactory` without middleware or ambient/global context.
+- `create()` remains inherit-none semantics; `inherit()` copies all parent context; `inheritOnly()` copies only caller-selected polymorphic attribute types while preserving parent attribute order.
+- Child-specific overrides remain explicit through existing immutable `with()` / `replace()` operations, so Enveloping does not impose domain-specific propagation or cardinality policy.
+- Added regression coverage for all/selected/none inheritance, polymorphic selection, invalid selection types, parent immutability, ordering, and explicit child replacement.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (69 tests, 215 assertions); coverage 98.6% lines / 86.0% methods / 97.3% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+

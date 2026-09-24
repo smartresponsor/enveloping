@@ -57,7 +57,9 @@ Attribute lookup is polymorphic: callers may query a concrete `Envelope*Attribut
 
 `with()` appends context and permits repeated values of the same type. Enveloping intentionally does not declare global singleton/multi-value cardinality. When a composing use case wants singleton semantics it calls `replace()` explicitly.
 
-`without()` removes attributes compatible with the requested type, while `has()`, `last()`, and `all()` provide typed introspection. `withSubject()` explicitly rebinds the same immutable context to another subject; context propagation is therefore caller-controlled rather than automatic.
+`without()` removes attributes compatible with the requested type, while `has()`, `last()`, and `all()` provide typed introspection. `withSubject()` explicitly rebinds the same immutable context to another subject.
+
+Parent-to-child propagation is explicit through `EnvelopeFactory`: `create()` inherits no parent context, `inherit()` copies all parent attributes, and `inheritOnly()` copies only caller-selected attribute types while preserving parent order. Selection is polymorphic. Enveloping does not automatically decide what propagates, and child-specific context remains explicit through existing `with()` / `replace()` operations.
 
 ## Process-boundary encoding
 

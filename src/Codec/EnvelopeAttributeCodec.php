@@ -18,9 +18,11 @@ interface EnvelopeAttributeCodec
     public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool;
 
     /**
-     * Reports whether this codec owns the stable transport type identifier.
+     * Returns every stable transport type identifier owned by this codec.
+     *
+     * @return list<string>
      */
-    public function supportsType(string $type): bool;
+    public function transportTypes(): array;
 
     /**
      * Converts a supported typed attribute into transport-safe scalar payload data.

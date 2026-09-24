@@ -58,3 +58,11 @@
 - Added subject-prefixed `config/envelope_messenger.yaml` and verified real container wiring with `debug:container App\\Enveloping\\Codec\\EnvelopeMessengerCodec`.
 - Added tests for round-trip context, missing stamps, invalid subjects, invalid versions, stamp serialization, and transport attribute reconstruction.
 - Verification: Composer dev/prod validation PASS; PHPUnit PASS (25 tests, 74 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.3% lines / 86.1% methods / 91.1% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — deterministic codec ownership milestone
+
+- Replaced dynamic `supportsType()` probing with explicit `transportTypes()` ownership declarations on `EnvelopeAttributeCodec`.
+- `EnvelopeAttributeCodecRegistry` now indexes stable wire types once and rejects empty or duplicate ownership instead of silently using first-wins decode behavior.
+- Added automatic Symfony DI tagging for every `EnvelopeAttributeCodec` implementation so consumers can contribute codecs without manual tag boilerplate.
+- Added regression coverage for duplicate/empty transport type ownership and DI autoconfiguration.
+- Verification: PHPUnit PASS (28 tests, 80 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.5% lines / 86.1% methods / 92.1% branches; Gating PASS with 0 failures and 0 warnings.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enveloping\Tests\Unit;
 
+use App\Enveloping\Codec\EnvelopeAttributeCodec;
 use App\Enveloping\DependencyInjection\EnvelopingExtension;
 use App\Enveloping\EnvelopingBundle;
 use App\Enveloping\Factory\EnvelopeFactory;
@@ -18,6 +19,21 @@ final class EnvelopingBundleTest extends TestCase
 
         self::assertInstanceOf(EnvelopingExtension::class, $extension);
         self::assertSame('enveloping', $extension->getAlias());
+    }
+
+    public function testAttributeCodecsAreAutoconfiguredIntoTheRegistryTag(): void
+    {
+        $container = new ContainerBuilder();
+
+        (new EnvelopingExtension())->load([], $container);
+
+        $autoconfigured = $container->getAutoconfiguredInstanceof();
+
+        self::assertArrayHasKey(EnvelopeAttributeCodec::class, $autoconfigured);
+        self::assertArrayHasKey(
+            'enveloping.attribute_codec',
+            $autoconfigured[EnvelopeAttributeCodec::class]->getTags(),
+        );
     }
 
     public function testExtensionLoadsPackageParametersAndFactoryService(): void

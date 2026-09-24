@@ -62,6 +62,27 @@ final class EnvelopeCodecTest extends TestCase
         self::assertSame('custom-value', $decoded->value);
     }
 
+    public function testDuplicateTransportTypeOwnershipIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('owned by multiple codecs');
+
+        new EnvelopeAttributeCodecRegistry([
+            new EnvelopeTestAttributeCodec(),
+            new EnvelopeTestAttributeCodec(),
+        ]);
+    }
+
+    public function testEmptyTransportTypeOwnershipIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('transport type must be non-empty');
+
+        new EnvelopeAttributeCodecRegistry([
+            new EnvelopeEmptyTypeCodec(),
+        ]);
+    }
+
     public function testUnsupportedAttributeFailsAtSerializationBoundary(): void
     {
         $registry = new EnvelopeAttributeCodecRegistry([]);
@@ -120,7 +141,7 @@ final class EnvelopeCodecTest extends TestCase
 
         $unknown = new EnvelopeAttributeTransportDTO('unknown.attribute', []);
 
-        self::assertFalse($codec->supportsType($unknown->type));
+        self::assertNotContains($unknown->type, $codec->transportTypes());
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported envelope attribute transport type');
@@ -143,9 +164,9 @@ final class EnvelopeTestAttributeCodec implements EnvelopeAttributeCodec
         return $attribute instanceof EnvelopeTestAttribute;
     }
 
-    public function supportsType(string $type): bool
+    public function transportTypes(): array
     {
-        return 'test' === $type;
+        return ['test'];
     }
 
     public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
@@ -165,5 +186,28 @@ final class EnvelopeTestAttributeCodec implements EnvelopeAttributeCodec
         }
 
         return new EnvelopeTestAttribute($value);
+    }
+}
+
+final class EnvelopeEmptyTypeCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return false;
+    }
+
+    public function transportTypes(): array
+    {
+        return [''];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        throw new \LogicException('Not used.');
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        throw new \LogicException('Not used.');
     }
 }

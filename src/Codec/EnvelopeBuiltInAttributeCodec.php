@@ -33,16 +33,18 @@ final class EnvelopeBuiltInAttributeCodec implements EnvelopeAttributeCodec
     }
 
     /**
-     * Recognizes only the stable wire identifiers owned by Enveloping.
+     * Declares the stable wire identifiers owned by the built-in vocabulary.
+     *
+     * @return list<string>
      */
-    public function supportsType(string $type): bool
+    public function transportTypes(): array
     {
-        return \in_array($type, [
+        return [
             self::TYPE_ACTOR,
             self::TYPE_CAUSATION,
             self::TYPE_CORRELATION,
             self::TYPE_ORIGIN,
-        ], true);
+        ];
     }
 
     /**

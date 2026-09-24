@@ -98,6 +98,27 @@ final class EnvelopeMessengerCodecTest extends TestCase
         ));
     }
 
+    public function testContextStampRejectsMalformedAttributeShape(): void
+    {
+        $cases = [
+            ['not-a-list' => []],
+            ['invalid-entry'],
+            [['type' => '', 'payload' => []]],
+            [['type' => 'actor', 'payload' => 'invalid']],
+            [['type' => 'actor', 'payload' => [0 => 'invalid-key']]],
+            [['type' => 'actor', 'payload' => ['value' => ['invalid-value']]]],
+        ];
+
+        foreach ($cases as $attributes) {
+            try {
+                new EnvelopeContextStamp($attributes);
+                self::fail('Malformed stamp attributes should be rejected.');
+            } catch (\InvalidArgumentException) {
+                self::addToAssertionCount(1);
+            }
+        }
+    }
+
     public function testContextStampRejectsNonPositiveVersion(): void
     {
         $this->expectException(\InvalidArgumentException::class);

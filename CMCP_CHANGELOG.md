@@ -66,3 +66,11 @@
 - Added automatic Symfony DI tagging for every `EnvelopeAttributeCodec` implementation so consumers can contribute codecs without manual tag boilerplate.
 - Added regression coverage for duplicate/empty transport type ownership and DI autoconfiguration.
 - Verification: PHPUnit PASS (28 tests, 80 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.5% lines / 86.1% methods / 92.1% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — Messenger stamp boundary validation milestone
+
+- Hardened `EnvelopeContextStamp` so transport payload shape is validated at construction instead of trusted through PHPDoc alone.
+- Stamp attributes must be a list of entries with non-empty type IDs and scalar/null payload values under string keys.
+- Malformed list structure, entry shape, type, payload container, payload keys, and payload values fail fast with explicit exceptions.
+- Preserved native serializability and transport DTO reconstruction behavior.
+- Verification: PHPUnit PASS (29 tests, 86 assertions); PHPStan PASS; PHP-CS-Fixer PASS; coverage PASS at 97.8% lines / 86.1% methods / 93.3% branches; Gating PASS with 0 failures and 0 warnings.

@@ -14,16 +14,54 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  */
 final readonly class EnvelopeContextStamp implements StampInterface
 {
+    /** @var list<array{type:non-empty-string,payload:array<string, scalar|null>}> */
+    public array $attributes;
+
     /**
-     * @param list<array{type:string,payload:array<string, scalar|null>}> $attributes
+     * @param array<mixed> $attributes
      */
     public function __construct(
-        public array $attributes,
+        array $attributes,
         public int $version = EnvelopeTransportDTO::CURRENT_VERSION,
     ) {
         if ($version < 1) {
             throw new \InvalidArgumentException('Envelope context stamp version must be positive.');
         }
+
+        if (!array_is_list($attributes)) {
+            throw new \InvalidArgumentException('Envelope context stamp attributes must be a list.');
+        }
+
+        $normalized = [];
+        foreach ($attributes as $index => $attribute) {
+            if (!\is_array($attribute)) {
+                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d must be an array.', $index));
+            }
+
+            $type = $attribute['type'] ?? null;
+            $payload = $attribute['payload'] ?? null;
+
+            if (!\is_string($type) || '' === $type) {
+                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d requires a non-empty type.', $index));
+            }
+
+            if (!\is_array($payload)) {
+                throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d requires an array payload.', $index));
+            }
+
+            foreach ($payload as $key => $value) {
+                if (!\is_string($key) || !(null === $value || \is_scalar($value))) {
+                    throw new \InvalidArgumentException(\sprintf('Envelope context stamp attribute %d payload must contain only string keys and scalar/null values.', $index));
+                }
+            }
+
+            $normalized[] = [
+                'type' => $type,
+                'payload' => $payload,
+            ];
+        }
+
+        $this->attributes = $normalized;
     }
 
     /**

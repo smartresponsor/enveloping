@@ -50,3 +50,11 @@ The core uses canonical technical-role-first placement:
 - `EnvelopeActorAttribute`, `EnvelopeOriginAttribute`, `EnvelopeCorrelationAttribute`, and `EnvelopeCausationAttribute` — the initial deliberately small generic vocabulary.
 
 Consumer-specific contextual concepts remain outside this package until repeated cross-component use proves that they are genuinely generic.
+
+## Envelope semantics
+
+Attribute lookup is polymorphic: callers may query a concrete `Envelope*Attribute` type or a compatible contract such as `EnvelopeAttributeInterface`. Attachment order is preserved.
+
+`with()` appends context and permits repeated values of the same type. Enveloping intentionally does not declare global singleton/multi-value cardinality. When a composing use case wants singleton semantics it calls `replace()` explicitly.
+
+`without()` removes attributes compatible with the requested type, while `has()`, `last()`, and `all()` provide typed introspection. `withSubject()` explicitly rebinds the same immutable context to another subject; context propagation is therefore caller-controlled rather than automatic.

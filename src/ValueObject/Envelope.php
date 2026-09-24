@@ -10,23 +10,22 @@ use App\Enveloping\ValueObjectInterface\EnvelopeAttributeInterface;
  * Wraps an arbitrary subject with immutable typed execution-context values.
  *
  * The subject remains unaware of Enveloping and its intrinsic state is never
- * mutated when contextual attributes are added or removed.
+ * mutated when contextual attributes are added, replaced, removed, or rebound.
  */
 final readonly class Envelope
 {
-    /** @var array<class-string<EnvelopeAttributeInterface>, list<EnvelopeAttributeInterface>> */
+    /** @var list<EnvelopeAttributeInterface> */
     private array $attributes;
 
     /** @param iterable<EnvelopeAttributeInterface> $attributes */
     public function __construct(public mixed $subject, iterable $attributes = [])
     {
-        $indexed = [];
-
+        $normalized = [];
         foreach ($attributes as $attribute) {
-            $indexed[$attribute::class][] = $attribute;
+            $normalized[] = $attribute;
         }
 
-        $this->attributes = $indexed;
+        $this->attributes = $normalized;
     }
 
     /**
@@ -38,11 +37,44 @@ final readonly class Envelope
             return $this;
         }
 
-        return new self($this->subject, [...$this->flatten(), ...$attributes]);
+        return new self($this->subject, [...$this->attributes, ...$attributes]);
     }
 
     /**
-     * Returns the most recently attached attribute of the requested type.
+     * Returns a new envelope whose subject is replaced while context is preserved.
+     */
+    public function withSubject(mixed $subject): self
+    {
+        if ($subject === $this->subject) {
+            return $this;
+        }
+
+        return new self($subject, $this->attributes);
+    }
+
+    /**
+     * Replaces every attribute compatible with the new attribute type.
+     *
+     * Replacement is explicit so Enveloping does not impose singleton or
+     * multi-value cardinality rules on consumers.
+     */
+    public function replace(EnvelopeAttributeInterface $attribute): self
+    {
+        return $this->without($attribute::class)->with($attribute);
+    }
+
+    /**
+     * Reports whether at least one compatible attribute is attached.
+     *
+     * @param class-string<EnvelopeAttributeInterface> $attributeClass
+     */
+    public function has(string $attributeClass): bool
+    {
+        return null !== $this->last($attributeClass);
+    }
+
+    /**
+     * Returns the most recently attached attribute compatible with the requested type.
      *
      * @template T of EnvelopeAttributeInterface
      *
@@ -52,18 +84,19 @@ final readonly class Envelope
      */
     public function last(string $attributeClass): ?EnvelopeAttributeInterface
     {
-        $attributes = $this->attributes[$attributeClass] ?? [];
-        if ([] === $attributes) {
-            return null;
+        for ($index = \count($this->attributes) - 1; $index >= 0; --$index) {
+            $attribute = $this->attributes[$index];
+
+            if ($attribute instanceof $attributeClass) {
+                return $attribute;
+            }
         }
 
-        $last = $attributes[array_key_last($attributes)];
-
-        return $last instanceof $attributeClass ? $last : null;
+        return null;
     }
 
     /**
-     * Returns every attached attribute of the requested type in attachment order.
+     * Returns every attached attribute compatible with the requested type.
      *
      * @template T of EnvelopeAttributeInterface
      *
@@ -73,29 +106,26 @@ final readonly class Envelope
      */
     public function all(string $attributeClass): array
     {
-        $matches = $this->attributes[$attributeClass] ?? [];
-
         return array_values(array_filter(
-            $matches,
+            $this->attributes,
             static fn (EnvelopeAttributeInterface $attribute): bool => $attribute instanceof $attributeClass,
         ));
     }
 
     /**
-     * Returns a new envelope without attributes of the requested type.
+     * Returns a new envelope without attributes compatible with the requested type.
      *
      * @param class-string<EnvelopeAttributeInterface> $attributeClass
      */
     public function without(string $attributeClass): self
     {
-        $attributes = [];
+        $attributes = array_values(array_filter(
+            $this->attributes,
+            static fn (EnvelopeAttributeInterface $attribute): bool => !$attribute instanceof $attributeClass,
+        ));
 
-        foreach ($this->attributes as $class => $items) {
-            if ($class === $attributeClass) {
-                continue;
-            }
-
-            array_push($attributes, ...$items);
+        if ($attributes === $this->attributes) {
+            return $this;
         }
 
         return new self($this->subject, $attributes);
@@ -108,18 +138,6 @@ final readonly class Envelope
      */
     public function attributes(): array
     {
-        return $this->flatten();
-    }
-
-    /** @return list<EnvelopeAttributeInterface> */
-    private function flatten(): array
-    {
-        $flat = [];
-
-        foreach ($this->attributes as $attributes) {
-            array_push($flat, ...$attributes);
-        }
-
-        return $flat;
+        return $this->attributes;
     }
 }

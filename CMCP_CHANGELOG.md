@@ -19,3 +19,12 @@
 - Kept the core transport-agnostic: no Doctrine, CRUD, Messenger, Shipping, Payment, Messaging, Delivering, or Notifying dependency was introduced.
 - Verified real standalone boot with `debug:container App\\Enveloping\\Factory\\EnvelopeFactory`.
 - Verification: Composer dev/prod validation PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit PASS (7 tests, 20 assertions); coverage PASS at 97.4% lines / 86.7% methods / 93.9% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-23 — polymorphic context semantics milestone
+
+- Reworked Envelope storage into an ordered attribute list so lookup/removal can honor PHP polymorphism rather than exact-class indexing.
+- Added `has()`, explicit `replace()`, and immutable `withSubject()` semantics.
+- Preserved multi-value attributes by default; cardinality remains a caller/use-case decision rather than package-global knowledge.
+- `withSubject()` provides explicit context propagation without making subjects depend on Enveloping or introducing automatic propagation policy.
+- Added regression coverage for polymorphic contract lookup/removal, replacement semantics, subject rebinding, and iterable normalization.
+- Verification: PHPUnit PASS (11 tests, 32 assertions); coverage PASS at 97.5% lines / 94.1% methods / 96.8% branches; PHPStan PASS; PHP-CS-Fixer PASS; Gating PASS with 0 failures and 0 warnings.

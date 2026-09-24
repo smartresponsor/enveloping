@@ -161,6 +161,14 @@
 - Added regression coverage for all three runtime collection boundaries.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (56 tests, 171 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — runtime attribute class-string validation milestone
+
+- Hardened `Envelope::last()`, `all()`, and `without()` so runtime callers must provide a class/interface implementing `EnvelopeAttributeInterface`; `has()` inherits the same validation through `last()`.
+- Preserved the strict `class-string<EnvelopeAttributeInterface>` / generic PHPDoc surface for static consumers while retaining defensive validation for dynamic/runtime callers.
+- Invalid class names, missing classes, and unrelated classes now fail explicitly with `InvalidArgumentException` instead of silently behaving like an empty lookup/removal.
+- Polymorphic interface lookup remains supported, including `EnvelopeAttributeInterface::class` itself.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (57 tests, 175 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings; Canon040 reports 98.2% lines / 83.3% methods / 96.7% branches.
+
 ## 2026-09-24 — RC convergence and Canon052 boundary repair
 
 - Reconnaissance covered the current Enveloping README, Composer development/production manifests, Symfony configuration, source/docblocks, tests, quality scripts, tracked documentation, and the local helper/canon contour for Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization.

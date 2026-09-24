@@ -88,6 +88,10 @@ final readonly class Envelope
      */
     public function last(string $attributeClass): ?EnvelopeAttributeInterface
     {
+        // Runtime callers are not constrained by PHPDoc.
+        // @phpstan-ignore method.alreadyNarrowedType
+        $this->assertAttributeClass($attributeClass);
+
         for ($index = \count($this->attributes) - 1; $index >= 0; --$index) {
             $attribute = $this->attributes[$index];
 
@@ -110,6 +114,10 @@ final readonly class Envelope
      */
     public function all(string $attributeClass): array
     {
+        // Runtime callers are not constrained by PHPDoc.
+        // @phpstan-ignore method.alreadyNarrowedType
+        $this->assertAttributeClass($attributeClass);
+
         return array_values(array_filter(
             $this->attributes,
             static fn (EnvelopeAttributeInterface $attribute): bool => $attribute instanceof $attributeClass,
@@ -123,6 +131,10 @@ final readonly class Envelope
      */
     public function without(string $attributeClass): self
     {
+        // Runtime callers are not constrained by PHPDoc.
+        // @phpstan-ignore method.alreadyNarrowedType
+        $this->assertAttributeClass($attributeClass);
+
         $attributes = array_values(array_filter(
             $this->attributes,
             static fn (EnvelopeAttributeInterface $attribute): bool => !$attribute instanceof $attributeClass,
@@ -143,5 +155,15 @@ final readonly class Envelope
     public function attributes(): array
     {
         return $this->attributes;
+    }
+
+    /**
+     * @phpstan-assert class-string<EnvelopeAttributeInterface> $attributeClass
+     */
+    private function assertAttributeClass(string $attributeClass): void
+    {
+        if (!is_a($attributeClass, EnvelopeAttributeInterface::class, true)) {
+            throw new \InvalidArgumentException(\sprintf('Envelope attribute class must implement %s; %s given.', EnvelopeAttributeInterface::class, $attributeClass));
+        }
     }
 }

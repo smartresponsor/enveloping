@@ -134,6 +134,31 @@ final class EnvelopeTest extends TestCase
         }
     }
 
+    public function testAttributeClassQueriesRejectInvalidClassStrings(): void
+    {
+        $envelope = new Envelope('subject', [new EnvelopeActorAttribute('actor-1')]);
+
+        $operations = [
+            // @phpstan-ignore-next-line deliberate invalid runtime input
+            static fn (Envelope $value): mixed => $value->has('not-a-class'),
+            // @phpstan-ignore-next-line deliberate invalid runtime input
+            static fn (Envelope $value): mixed => $value->last(\stdClass::class),
+            // @phpstan-ignore-next-line deliberate invalid runtime input
+            static fn (Envelope $value): mixed => $value->all('App\\Missing\\EnvelopeAttribute'),
+            // @phpstan-ignore-next-line deliberate invalid runtime input
+            static fn (Envelope $value): mixed => $value->without(\stdClass::class),
+        ];
+
+        foreach ($operations as $operation) {
+            try {
+                $operation($envelope);
+                self::fail('Invalid Envelope attribute class-string should be rejected.');
+            } catch (\InvalidArgumentException $exception) {
+                self::assertStringContainsString('must implement', $exception->getMessage());
+            }
+        }
+    }
+
     public function testAttributeTypeCanBeRemovedWithoutChangingSubject(): void
     {
         $subject = new \stdClass();

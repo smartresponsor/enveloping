@@ -183,6 +183,14 @@
 - This protects Enveloping's runtime independence: installing the package with production dependencies does not force Symfony Messenger.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (61 tests, 200 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — symmetric decode ownership milestone
+
+- Hardened `EnvelopeAttributeCodecRegistry::decode()` so wire-type ownership and runtime-attribute ownership are validated symmetrically.
+- A codec may decode its wire type only into a runtime attribute that it also declares support for.
+- Decoded runtime attributes must not be simultaneously supported by another registered codec; ambiguous decode ownership fails with `EnvelopeCodecException`.
+- Added regression coverage for unsupported decoded runtime attributes and ambiguous decoded ownership.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (63 tests, 204 assertions); coverage 98.6% lines / 85.4% methods / 97.2% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
+
 ## 2026-09-24 — runtime attribute class-string validation milestone
 
 - Hardened `Envelope::last()`, `all()`, and `without()` so runtime callers must provide a class/interface implementing `EnvelopeAttributeInterface`; `has()` inherits the same validation through `last()`.

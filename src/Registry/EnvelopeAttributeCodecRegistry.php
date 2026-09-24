@@ -115,6 +115,19 @@ final readonly class EnvelopeAttributeCodecRegistry
             throw new EnvelopeCodecException('No envelope attribute codec supports transport type '.$transport->type.'.');
         }
 
-        return $codec->decode($transport);
+        $attribute = $codec->decode($transport);
+        if (!$codec->supportsAttribute($attribute)) {
+            throw new EnvelopeCodecException(\sprintf('Envelope attribute codec %s decoded transport type %s into an unsupported runtime attribute %s.', $codec::class, $transport->type, $attribute::class));
+        }
+
+        foreach ($this->codecs as $candidate) {
+            if ($candidate === $codec || !$candidate->supportsAttribute($attribute)) {
+                continue;
+            }
+
+            throw new EnvelopeCodecException(\sprintf('Decoded Envelope attribute %s is supported by multiple codecs.', $attribute::class));
+        }
+
+        return $attribute;
     }
 }

@@ -140,6 +140,31 @@ final class EnvelopeCodecTest extends TestCase
         $registry->encode(new EnvelopeTestAttribute('value'));
     }
 
+    public function testDecodeRejectsRuntimeAttributeNotOwnedByWireCodec(): void
+    {
+        $registry = new EnvelopeAttributeCodecRegistry([
+            new EnvelopeBadDecodeCodec(),
+        ]);
+
+        $this->expectException(EnvelopeCodecException::class);
+        $this->expectExceptionMessage('decoded transport type bad into an unsupported runtime attribute');
+
+        $registry->decode(new EnvelopeAttributeTransportDTO('bad', ['value' => 'x']));
+    }
+
+    public function testDecodeRejectsAmbiguousRuntimeAttributeOwnership(): void
+    {
+        $registry = new EnvelopeAttributeCodecRegistry([
+            new EnvelopeTestAttributeCodec(),
+            new EnvelopeSecondRuntimeOwnerCodec(),
+        ]);
+
+        $this->expectException(EnvelopeCodecException::class);
+        $this->expectExceptionMessage('Decoded Envelope attribute');
+
+        $registry->decode(new EnvelopeAttributeTransportDTO('test', ['value' => 'x']));
+    }
+
     public function testUnsupportedAttributeFailsAtSerializationBoundary(): void
     {
         $registry = new EnvelopeAttributeCodecRegistry([]);
@@ -505,5 +530,40 @@ final class EnvelopeNonStringTransportTypesCodec implements EnvelopeAttributeCod
     public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
     {
         throw new \LogicException('Not used.');
+    }
+}
+
+final readonly class EnvelopeOtherAttribute implements EnvelopeAttributeInterface
+{
+    public function __construct(public string $value)
+    {
+    }
+}
+
+final class EnvelopeBadDecodeCodec implements EnvelopeAttributeCodec
+{
+    public function supportsAttribute(EnvelopeAttributeInterface $attribute): bool
+    {
+        return $attribute instanceof EnvelopeTestAttribute;
+    }
+
+    public function transportTypes(): array
+    {
+        return ['bad'];
+    }
+
+    public function encode(EnvelopeAttributeInterface $attribute): EnvelopeAttributeTransportDTO
+    {
+        return new EnvelopeAttributeTransportDTO('bad', ['value' => 'x']);
+    }
+
+    public function decode(EnvelopeAttributeTransportDTO $transport): EnvelopeAttributeInterface
+    {
+        $value = $transport->payload['value'] ?? null;
+        if (!\is_string($value)) {
+            throw new \InvalidArgumentException('EnvelopeBadDecodeCodec payload value must be a string.');
+        }
+
+        return new EnvelopeOtherAttribute($value);
     }
 }

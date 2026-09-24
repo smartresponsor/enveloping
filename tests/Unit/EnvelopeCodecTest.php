@@ -186,6 +186,28 @@ final class EnvelopeCodecTest extends TestCase
         );
     }
 
+    public function testTransportDTORejectsAssociativeAttributeCollection(): void
+    {
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('attributes must be a list');
+
+        new \App\Enveloping\DTO\EnvelopeTransportDTO(
+            'subject',
+            ['attribute' => new EnvelopeAttributeTransportDTO('actor', ['identity' => 'actor-1'])],
+        );
+    }
+
+    public function testTransportDTORejectsNonAttributeDTOItems(): void
+    {
+        $this->expectException(EnvelopeTransportException::class);
+        $this->expectExceptionMessage('must be an EnvelopeAttributeTransportDTO');
+
+        new \App\Enveloping\DTO\EnvelopeTransportDTO(
+            'subject',
+            ['not-an-attribute-dto'],
+        );
+    }
+
     public function testTransportVersionMustBePositive(): void
     {
         $this->expectException(EnvelopeTransportException::class);

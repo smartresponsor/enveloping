@@ -125,3 +125,11 @@
 - Codec registry duplicate/empty type ownership, ambiguous runtime ownership, unsupported attribute/type ownership, and undeclared emitted type failures now expose `EnvelopeCodecException`.
 - Deliberate caller misuse outside transport corruption remains ordinary `InvalidArgumentException`.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (45 tests, 132 assertions); coverage 97.7% lines / 82.6% methods / 94.2% branches; Gating PASS with 0 failures and 0 warnings.
+
+## 2026-09-24 — transport DTO collection validation milestone
+
+- Hardened `EnvelopeTransportDTO` so its attribute collection is runtime-validated instead of relying on PHPDoc alone.
+- Attributes must be an ordered list and every item must be an `EnvelopeAttributeTransportDTO`; associative collections and arbitrary values fail fast with `EnvelopeTransportException`.
+- Preserved the public wire version and subject contract.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (47 tests, 136 assertions); coverage 97.8% lines / 82.6% methods / 94.4% branches.
+- Gating is currently blocked only by Canon052 because the pre-existing/concurrently modified `.gating/` consumer tree is no longer considered artifact-only by the current Gating rule. `.gating/README.md` was already dirty before this milestone and was deliberately preserved.

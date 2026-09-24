@@ -16,16 +16,32 @@ final readonly class EnvelopeTransportDTO
 {
     public const int CURRENT_VERSION = 1;
 
-    /**
-     * @param list<EnvelopeAttributeTransportDTO> $attributes
-     */
+    /** @var list<EnvelopeAttributeTransportDTO> */
+    public array $attributes;
+
+    /** @param array<mixed> $attributes */
     public function __construct(
         public mixed $subject,
-        public array $attributes,
+        array $attributes,
         public int $version = self::CURRENT_VERSION,
     ) {
         if ($version < 1) {
             throw new EnvelopeTransportException('Envelope transport version must be positive.');
         }
+
+        if (!array_is_list($attributes)) {
+            throw new EnvelopeTransportException('Envelope transport attributes must be a list.');
+        }
+
+        $normalized = [];
+        foreach ($attributes as $index => $attribute) {
+            if (!$attribute instanceof EnvelopeAttributeTransportDTO) {
+                throw new EnvelopeTransportException(\sprintf('Envelope transport attribute %d must be an EnvelopeAttributeTransportDTO.', $index));
+            }
+
+            $normalized[] = $attribute;
+        }
+
+        $this->attributes = $normalized;
     }
 }

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Enveloping\Tests\Unit;
 
 use App\Enveloping\Codec\EnvelopeAttributeCodec;
+use App\Enveloping\Codec\EnvelopeCodec;
+use App\Enveloping\Codec\EnvelopeJsonCodec;
+use App\Enveloping\Codec\EnvelopeMessengerCodec;
 use App\Enveloping\DependencyInjection\EnvelopingExtension;
 use App\Enveloping\EnvelopingBundle;
 use App\Enveloping\Factory\EnvelopeFactory;
@@ -47,5 +50,13 @@ final class EnvelopingBundleTest extends TestCase
             $container->getParameter('enveloping.package_dir'),
         );
         self::assertTrue($container->hasDefinition(EnvelopeFactory::class));
+        self::assertTrue($container->hasDefinition(EnvelopeCodec::class));
+        self::assertTrue($container->hasDefinition(EnvelopeJsonCodec::class));
+
+        if (interface_exists(\Symfony\Component\Messenger\Stamp\StampInterface::class)) {
+            self::assertTrue($container->hasDefinition(EnvelopeMessengerCodec::class));
+        } else {
+            self::assertFalse($container->hasDefinition(EnvelopeMessengerCodec::class));
+        }
     }
 }

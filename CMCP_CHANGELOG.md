@@ -168,6 +168,14 @@
 - Polymorphic interface/base-class queries remain supported.
 - Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (60 tests, 181 assertions); coverage 98.5% lines / 85.4% methods / 97.1% branches; Gating PASS with 70 rules, 0 failures and 0 warnings.
 
+## 2026-09-24 — Symfony service-surface contract milestone
+
+- Verified the compiled standalone container for `EnvelopeCodec`, `EnvelopeJsonCodec`, and the optional `EnvelopeMessengerCodec`.
+- Extended bundle regression coverage so `EnvelopeFactory`, `EnvelopeCodec`, and `EnvelopeJsonCodec` must always be registered by the extension.
+- `EnvelopeMessengerCodec` remains conditional on the presence of Symfony Messenger, preserving the runtime-optional integration boundary.
+- Service visibility remains private/autowired, which is intentional: consumers inject these services rather than fetching them from the container.
+- Verification: PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (60 tests, 184 assertions); Gating PASS with 70 rules, 0 failures and 0 warnings.
+
 ## 2026-09-24 — runtime attribute class-string validation milestone
 
 - Hardened `Envelope::last()`, `all()`, and `without()` so runtime callers must provide a class/interface implementing `EnvelopeAttributeInterface`; `has()` inherits the same validation through `last()`.

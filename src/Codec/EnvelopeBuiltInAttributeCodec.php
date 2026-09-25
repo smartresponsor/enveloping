@@ -87,6 +87,9 @@ final class EnvelopeBuiltInAttributeCodec implements EnvelopeAttributeCodec
         if (!\is_string($value)) {
             throw new EnvelopeTransportException(\sprintf('Envelope attribute %s requires string payload key %s.', $transport->type, $key));
         }
+        if ('' === $value) {
+            throw new EnvelopeTransportException(\sprintf('Envelope attribute %s requires non-empty string payload key %s.', $transport->type, $key));
+        }
 
         return $value;
     }

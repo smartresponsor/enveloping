@@ -375,6 +375,26 @@ final class EnvelopeCodecTest extends TestCase
 
         $codec->decode($unknown);
     }
+
+    public function testBuiltInCodecRejectsEmptyWireValuesAsTransportFailures(): void
+    {
+        $codec = new EnvelopeBuiltInAttributeCodec();
+        $cases = [
+            new EnvelopeAttributeTransportDTO('actor', ['identity' => '']),
+            new EnvelopeAttributeTransportDTO('origin', ['source' => '']),
+            new EnvelopeAttributeTransportDTO('correlation', ['id' => '']),
+            new EnvelopeAttributeTransportDTO('causation', ['id' => '']),
+        ];
+
+        foreach ($cases as $transport) {
+            try {
+                $codec->decode($transport);
+                self::fail('Empty built-in wire values must be rejected as transport failures.');
+            } catch (EnvelopeTransportException $exception) {
+                self::assertStringContainsString('requires non-empty string payload key', $exception->getMessage());
+            }
+        }
+    }
 }
 
 final readonly class EnvelopeTestAttribute implements EnvelopeAttributeInterface

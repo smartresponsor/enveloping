@@ -272,3 +272,12 @@
 - The repository has a configured canonical remote at `git@github.com:smartresponsor/enveloping.git` with `master` tracking `origin/master`.
 - This milestone prepares the signed release commit for publication. Signed semantic-version tagging remains a separate Git operation because the current Console MCP registry does not expose tag creation.
 
+## 2026-09-25 — RC transport exception convergence
+
+- Re-read the Enveloping package surface, transport compatibility contract, relevant source/tests, and the mandatory Objecting/Cruding/Viewing/Interfacing, Gating, and Canonization contour before patching.
+- Market/OSS comparison confirmed the mature context-propagation baseline: transport metadata is explicit, process-boundary input is validated, and untrusted propagated context must fail at the boundary rather than leak unrelated runtime failures.
+- Canon mapping retained Enveloping's explicit Canon022 standalone dependency-baseline exemption and Canon041/042 headless UI exemption; no application-helper runtime dependencies or browser surface were introduced.
+- Closed a typed-boundary defect in the built-in attribute decoder: empty `actor.identity`, `origin.source`, `correlation.id`, and `causation.id` wire values now fail as `EnvelopeTransportException` instead of escaping as value-object `InvalidArgumentException`.
+- Added regression coverage across all four built-in wire types. The v1 wire shape and documented non-empty built-in invariants are unchanged.
+- Final deterministic acceptance: `composer release:check` PASS; Composer dev/prod validation PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (72 tests, 232 assertions); coverage 98.63% lines / 86.00% methods / 97.32% branches; Gating PASS with 0 failures and 0 warnings.
+

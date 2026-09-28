@@ -281,3 +281,13 @@
 - Added regression coverage across all four built-in wire types. The v1 wire shape and documented non-empty built-in invariants are unchanged.
 - Final deterministic acceptance: `composer release:check` PASS; Composer dev/prod validation PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (72 tests, 232 assertions); coverage 98.63% lines / 86.00% methods / 97.32% branches; Gating PASS with 0 failures and 0 warnings.
 
+## 2026-09-28 — Canon052 artifact-boundary remediation
+
+- Baseline: `master` at `e393c750e92d46adcf42e4a527f64fe8f2365707`, one commit ahead of `origin/master`; CanonScanning reported one hard failure, Canon052, with fresh Inspecting evidence containing three medium observational findings and no analyzer failures.
+- Read the current Enveloping package surface plus Canonization/Gating contracts and the Objecting/Cruding/Viewing/Interfacing reference contour. Canonization explicitly keeps Enveloping outside the ordinary application dependency baseline, so no helper runtime dependencies were added.
+- Canon052 mapping confirmed Composer integration itself was already canonical; the only failing surface was a copied Gating owner tree exposed under consumer-local `.gating/`.
+- Preserved the polluted tree non-destructively by moving it to ignored `var/cache/enveloping-gating-pollution-20260928-093647`, then restored the tracked consumer-only `.gating/README.md`.
+- Acceptance: `composer release:check` PASS; Composer dev/prod validation PASS; PHP-CS-Fixer PASS; PHPStan PASS; PHPUnit coverage PASS (72 tests, 232 assertions) with 98.63% lines / 86.00% methods / 97.32% branches; local-dev Gating PASS (9-rule configured subset); post-mutation Inspecting completed with PHPStan 0 errors, Semgrep 0 findings/errors, and the same three non-blocking medium architecture observations. Canon052's concrete current conditions are satisfied: `gating/gate: dev-master`, `../Gating` path repository with `symlink=true`, `gate` + `quality` Composer scripts, packaged production Gating dependency, and consumer `.gating/` restored to artifact-only README state.
+- Growth-only observations remain separate: built-in codec type dispatch, JSON decode method decomposition, and potential OpenTelemetry/W3C baggage interop are not RC blockers absent correctness or operability impact.
+
+

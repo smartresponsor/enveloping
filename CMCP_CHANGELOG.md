@@ -399,5 +399,21 @@
 - Fresh current `composer gate` PASS: 10 rules, 0 failed, 0 warnings, 3 skipped. Canon052 historical owner-tree pollution is therefore not represented by the current executable consumer gate state.
 - Gates selected after this journal mutation: full `release:check`, post-mutation repository/Git inspection, and publication reconciliation. No browser/mobile behavioral or visual verification applies because no UI/runtime source changed and Enveloping is Canon041/042-exempt.
 
+## 2026-10-03 — engine-20261003190617 Canon052 RC execution checkpoint
+
+- Baseline: `master` at `e20a0ed73922f4b344d2002aa61de06bbc29fa20`, tracking `origin/master` at 0 ahead / 0 behind. The only pre-existing worktree change is deletion of `.gating/README.md`; it remains unrelated state and is not adopted by this task.
+- Read the authoritative execution specification, current Enveloping README/Composer contract, historical orchestration journal, and supplied CanonScanning RED report. The supplied fingerprint `5c969a00f8058a56ab21267f2ac8787ccbb2b5cd75720f0df40962c2366ecdc9` identifies historical Canon052 pollution by copied Gating-owner implementation under consumer `.gating/`.
+- Canonization consulted directly: `AGENTS.md`, `README.md`, and normative `.canonization/Governance/Architecture/Rule/Canon052GatingIntegrationRule.md`. Canon052 requires `gating/gate: dev-master`, development `../Gating` path resolution with `symlink=true`, a standard `gate` script included in aggregate `quality`, packaged production Gating, and consumer `.gating/` restricted to generated artifacts plus an optional non-executable README.
+- Canon022 applicability remains unchanged: Enveloping is the optional cross-cutting foundation exemption, so Objecting/Cruding/Viewing/Interfacing application-helper dependencies must not be invented merely to satisfy the generic application contour.
+- Market/OSS baseline refreshed against Symfony Messenger Envelope/Stamps, OpenTelemetry immutable Context/Baggage, and W3C Baggage. Mature practice separates contextual metadata from business payloads, keeps propagation explicit, validates trust-boundary input, and avoids consumer-domain coupling. Enveloping remains aligned; OpenTelemetry/W3C interoperability is growth work rather than an RC prerequisite.
+- RC-critical workstream: prove that the stale Canon052 RED is absent from the current executable topology without changing Enveloping runtime semantics or consuming unrelated dirty state. Growth workstream: optional propagation interoperability and internal codec/decode decomposition after RC.
+- Fresh current `composer gate` PASS: 10 rules, 0 failed, 0 warnings, 3 skipped. The historical copied Gating owner tree is therefore not represented by the current executable Canon052 state.
+- Material risks: reintroducing owner code under `.gating/`, creating false runtime dependencies contrary to Canon022, or treating observational quality findings as mandatory source refactors without canon/gate escalation.
+- Remaining acceptance gates after this journal mutation: full `composer release:check`, post-mutation Inspecting, final Git diff/status/branch/upstream reconciliation, coherent commit, and push when safe.
+- Final deterministic acceptance: `composer release:check` PASS; Composer dev/prod validation PASS; PHP-CS-Fixer reports 0 fixable files; PHPStan reports 0 errors; PHPUnit path coverage PASS (72 tests, 232 assertions); Gating PASS with 10 rules, 0 failed and 0 warnings.
+- Post-journal Inspecting completed successfully: PHPStan 0 errors, Semgrep 0 findings/engine errors, and exactly the same three medium non-autofixable observations as the supplied baseline (built-in codec repeated-type dispatch x2; JSON decode long method). No RC-blocking analyzer regression emerged.
+- UI/runtime applicability: no browser/mobile UI, navigation, forms, interactions, or user flows changed. Enveloping remains Canon041/042-exempt, so runtime restart, Panther/Playwright, and screenshots are not applicable.
+- RC conclusion: the historical Canon052 copied-owner-tree defect is absent from current executable topology. The only unrelated dirty path remains deletion of the optional `.gating/README.md`; it is intentionally excluded from this task's commit.
+
 
 
